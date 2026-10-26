@@ -2,6 +2,10 @@ import {
   portfolioHoldingSchema,
   type PortfolioHolding,
 } from "@/features/portfolio/model";
+import {
+  claimLegacyLocalData,
+  getUserStorageKey,
+} from "@/lib/auth/local-data-scope";
 
 const storageKey = "wealthtogether.portfolio.v2";
 const legacyStorageKey = "wealthtogether.portfolio.v1";
@@ -14,20 +18,25 @@ export type PortfolioLoadResult = {
 
 /** Replace this adapter with an authenticated Supabase repository when needed. */
 export interface PortfolioRepository {
-  load(): PortfolioLoadResult;
-  save(holdings: PortfolioHolding[]): void;
-  subscribe(listener: () => void): () => void;
+  load(userId: string): PortfolioLoadResult;
+  save(userId: string, holdings: PortfolioHolding[]): void;
+  subscribe(userId: string, listener: () => void): () => void;
 }
 
 export const localPortfolioRepository: PortfolioRepository = {
-  load() {
-    if (typeof window === "undefined") return { holdings: [] };
+  load(userId) {
+    if (typeof window === "undefined" || !userId) return { holdings: [] };
 
+    const scopedStorageKey = getUserStorageKey(storageKey, userId);
+    const ownsLegacyData = claimLegacyLocalData(userId);
     let raw: string | null;
     try {
-      raw = window.localStorage.getItem(storageKey);
+      raw = window.localStorage.getItem(scopedStorageKey);
+      if (!raw && ownsLegacyData) raw = window.localStorage.getItem(storageKey);
       if (!raw) {
-        const legacyRaw = window.localStorage.getItem(legacyStorageKey);
+        const legacyRaw = ownsLegacyData
+          ? window.localStorage.getItem(legacyStorageKey)
+          : null;
         if (!legacyRaw) return { holdings: [] };
         const legacyDocument = JSON.parse(legacyRaw) as {
           version?: unknown;
@@ -54,7 +63,7 @@ export const localPortfolioRepository: PortfolioRepository = {
         }
         try {
           window.localStorage.setItem(
-            storageKey,
+            scopedStorageKey,
             JSON.stringify({ version: storageVersion, holdings }),
           );
         } catch {
@@ -127,24 +136,21 @@ export const localPortfolioRepository: PortfolioRepository = {
     }
   },
 
-  save(holdings) {
-    if (typeof window === "undefined") {
+  save(userId, holdings) {
+    if (typeof window === "undefined" || !userId) {
       throw new Error("Portfolio storage is only available in a browser.");
     }
     window.localStorage.setItem(
-      storageKey,
+      getUserStorageKey(storageKey, userId),
       JSON.stringify({ version: storageVersion, holdings }),
     );
   },
 
-  subscribe(listener) {
+  subscribe(userId, listener) {
     if (typeof window === "undefined") return () => undefined;
+    const scopedStorageKey = getUserStorageKey(storageKey, userId);
     const onStorage = (event: StorageEvent) => {
-      if (
-        event.key === storageKey ||
-        event.key === legacyStorageKey ||
-        event.key === null
-      ) {
+      if (event.key === scopedStorageKey || event.key === null) {
         listener();
       }
     };

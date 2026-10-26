@@ -25,6 +25,13 @@ export type AdminClient = {
   goals: string;
   notes: string;
   follow_up_status: FollowUpStatus;
+  date_of_birth: string | null;
+  income: number;
+  risk_profile: "conservative" | "moderate" | "aggressive" | "not_assessed";
+  status: "lead" | "interested" | "active" | "inactive";
+  priority: "low" | "medium" | "high";
+  next_follow_up_at: string | null;
+  monthly_revenue: number;
   created_at: string;
   updated_at: string;
 };
@@ -66,6 +73,13 @@ const emptyClient: ClientInput = {
   goals: "",
   notes: "",
   followUpStatus: "none",
+  dateOfBirth: "",
+  income: 0,
+  riskProfile: "not_assessed",
+  status: "lead",
+  priority: "medium",
+  nextFollowUpAt: "",
+  monthlyRevenue: 0,
 };
 
 export function ClientFormDialog({
@@ -96,6 +110,15 @@ export function ClientFormDialog({
           goals: client.goals,
           notes: client.notes,
           followUpStatus: client.follow_up_status,
+          dateOfBirth: client.date_of_birth ?? "",
+          income: client.income ?? 0,
+          riskProfile: client.risk_profile ?? "not_assessed",
+          status: client.status ?? "lead",
+          priority: client.priority ?? "medium",
+          nextFollowUpAt: client.next_follow_up_at
+            ? new Date(client.next_follow_up_at).toISOString().slice(0, 16)
+            : "",
+          monthlyRevenue: client.monthly_revenue ?? 0,
         }
       : emptyClient,
   });
@@ -140,6 +163,13 @@ export function ClientFormDialog({
   const followUp = register("followUpStatus");
   const goals = register("goals");
   const notes = register("notes");
+  const dob = register("dateOfBirth");
+  const income = register("income");
+  const riskProfile = register("riskProfile");
+  const status = register("status");
+  const priority = register("priority");
+  const nextFollowUp = register("nextFollowUpAt");
+  const monthlyRevenue = register("monthlyRevenue");
 
   return (
     <div
@@ -212,6 +242,49 @@ export function ClientFormDialog({
               error={errors.occupation?.message}
               label="Occupation"
               registration={occupation}
+            />
+            <RegisteredField
+              error={errors.dateOfBirth?.message}
+              label="Date of birth"
+              registration={dob}
+              type="date"
+            />
+            <RegisteredField
+              error={errors.income?.message}
+              label="Annual income (₹)"
+              min="0"
+              registration={income}
+              type="number"
+            />
+            <RegisteredField
+              error={errors.monthlyRevenue?.message}
+              label="Monthly revenue (₹)"
+              min="0"
+              registration={monthlyRevenue}
+              type="number"
+            />
+            <SelectField label="Client status" registration={status}>
+              <option value="lead">Lead</option>
+              <option value="interested">Interested</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </SelectField>
+            <SelectField label="Priority" registration={priority}>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </SelectField>
+            <SelectField label="Risk profile" registration={riskProfile}>
+              <option value="not_assessed">Not assessed</option>
+              <option value="conservative">Conservative</option>
+              <option value="moderate">Moderate</option>
+              <option value="aggressive">Aggressive</option>
+            </SelectField>
+            <RegisteredField
+              error={errors.nextFollowUpAt?.message}
+              label="Next follow-up"
+              registration={nextFollowUp}
+              type="datetime-local"
             />
             <div className="space-y-2">
               <label
@@ -319,5 +392,29 @@ function TextAreaField({
         </p>
       ) : null}
     </div>
+  );
+}
+
+function SelectField({
+  label,
+  registration,
+  children,
+}: {
+  label: string;
+  registration: UseFormRegisterReturn;
+  children: React.ReactNode;
+}) {
+  const { ref, ...inputProps } = registration;
+  return (
+    <label className="block space-y-2 text-sm font-medium">
+      {label}
+      <select
+        className="border-input bg-background text-foreground mt-2 h-11 w-full rounded-lg border px-3.5 text-sm"
+        ref={ref}
+        {...inputProps}
+      >
+        {children}
+      </select>
+    </label>
   );
 }

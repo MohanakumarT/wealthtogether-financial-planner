@@ -11,6 +11,7 @@ export const metadata = createPageMetadata({
   path: "/auth/update-password",
   noIndex: true,
 });
+export const dynamic = "force-dynamic";
 
 export default async function UpdatePasswordPage() {
   const supabase = await createSupabaseServerClient();

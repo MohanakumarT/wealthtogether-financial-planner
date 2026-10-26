@@ -52,6 +52,9 @@ export function ClientsList() {
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
   const [followUp, setFollowUp] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [priority, setPriority] = useState("all");
+  const [sort, setSort] = useState("updated_at:desc");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,6 +65,11 @@ export function ClientsList() {
     const params = new URLSearchParams({ page: String(page) });
     if (query) params.set("search", query);
     if (followUp !== "all") params.set("followUp", followUp);
+    if (status !== "all") params.set("status", status);
+    if (priority !== "all") params.set("priority", priority);
+    const [sortColumn, sortDirection] = sort.split(":");
+    params.set("sort", sortColumn);
+    params.set("direction", sortDirection);
     fetchAdminJson<ClientPageData>(`/api/admin/clients?${params}`)
       .then(setData)
       .catch((reason: unknown) =>
@@ -72,7 +80,7 @@ export function ClientsList() {
         ),
       )
       .finally(() => setLoading(false));
-  }, [page, query, followUp]);
+  }, [page, query, followUp, status, priority, sort]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -83,6 +91,10 @@ export function ClientsList() {
   }, [search]);
   useEffect(() => {
     refresh();
+  }, [refresh]);
+  useEffect(() => {
+    window.addEventListener("crm:changed", refresh);
+    return () => window.removeEventListener("crm:changed", refresh);
   }, [refresh]);
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / 20));
@@ -106,11 +118,13 @@ export function ClientsList() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
-            onClick={() => window.location.assign("/api/admin/clients/export")}
+            onClick={() =>
+              window.location.assign("/api/admin/clients/export-xlsx")
+            }
             variant="outline"
           >
             <ArrowDownToLine aria-hidden="true" className="size-4" />
-            Export CSV
+            Export Excel
           </Button>
           <Button onClick={() => setDialog("new")} variant="gold">
             <Plus aria-hidden="true" className="size-4" />
@@ -120,7 +134,7 @@ export function ClientsList() {
       </div>
 
       <Card className="p-4 sm:p-5">
-        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="relative">
             <Search
               aria-hidden="true"
@@ -149,6 +163,48 @@ export function ClientsList() {
             <option value="completed">Completed</option>
             <option value="none">No follow-up set</option>
           </select>
+          <select
+            aria-label="Filter by client status"
+            className="border-input bg-background text-foreground h-11 w-full rounded-lg border px-3.5 text-sm"
+            onChange={(event) => {
+              setStatus(event.target.value);
+              setPage(1);
+            }}
+            value={status}
+          >
+            <option value="all">All client statuses</option>
+            <option value="lead">Lead</option>
+            <option value="interested">Interested</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <select
+            aria-label="Filter by priority"
+            className="border-input bg-background text-foreground h-11 w-full rounded-lg border px-3.5 text-sm"
+            onChange={(event) => {
+              setPriority(event.target.value);
+              setPage(1);
+            }}
+            value={priority}
+          >
+            <option value="all">All priorities</option>
+            <option value="high">High priority</option>
+            <option value="medium">Medium priority</option>
+            <option value="low">Low priority</option>
+          </select>
+          <select
+            aria-label="Sort clients"
+            className="border-input bg-background text-foreground h-11 w-full rounded-lg border px-3.5 text-sm"
+            onChange={(event) => setSort(event.target.value)}
+            value={sort}
+          >
+            <option value="updated_at:desc">Recently updated</option>
+            <option value="created_at:desc">Recently added</option>
+            <option value="name:asc">Name (A–Z)</option>
+            <option value="name:desc">Name (Z–A)</option>
+            <option value="next_follow_up_at:asc">Follow-up (soonest)</option>
+            <option value="next_follow_up_at:desc">Follow-up (latest)</option>
+          </select>
         </div>
       </Card>
 
@@ -173,12 +229,18 @@ export function ClientsList() {
               <UsersRound aria-hidden="true" className="size-6" />
             </span>
             <h2 className="mt-4 text-base font-semibold">
-              {query || followUp !== "all"
+              {query ||
+              followUp !== "all" ||
+              status !== "all" ||
+              priority !== "all"
                 ? "No matching clients"
                 : "Your client list starts here"}
             </h2>
             <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm leading-6">
-              {query || followUp !== "all"
+              {query ||
+              followUp !== "all" ||
+              status !== "all" ||
+              priority !== "all"
                 ? "Try a different search or follow-up status."
                 : "Add a client to keep their goals, consultation history and saved plans together."}
             </p>
@@ -197,12 +259,14 @@ export function ClientsList() {
         {shown > 0 ? (
           <>
             <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-[980px] text-left text-sm">
                 <thead className="bg-muted/65 text-muted-foreground text-xs">
                   <tr>
                     <th className="px-5 py-3.5 font-medium">Client</th>
                     <th className="px-5 py-3.5 font-medium">Phone</th>
                     <th className="px-5 py-3.5 font-medium">City</th>
+                    <th className="px-5 py-3.5 font-medium">Status</th>
+                    <th className="px-5 py-3.5 font-medium">Priority</th>
                     <th className="px-5 py-3.5 font-medium">Follow-up</th>
                     <th className="px-5 py-3.5 font-medium">Last updated</th>
                     <th className="px-5 py-3.5" />
@@ -236,7 +300,15 @@ export function ClientsList() {
                         {client.city || "—"}
                       </td>
                       <td className="px-5 py-4">
+                        <StatusBadge status={client.status} />
+                      </td>
+                      <td className="px-5 py-4">
+                        <PriorityBadge priority={client.priority} />
+                      </td>
+                      <td className="px-5 py-4">
                         <FollowBadge status={client.follow_up_status} />
+                        <StatusBadge status={client.status} />
+                        <PriorityBadge priority={client.priority} />
                       </td>
                       <td className="text-muted-foreground px-5 py-4">
                         {date(client.updated_at)}
@@ -347,6 +419,40 @@ function FollowBadge({ status }: { status: FollowUpStatus }) {
       className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${colors}`}
     >
       {followLabels[status]}
+    </span>
+  );
+}
+
+function StatusBadge({ status }: { status: AdminClient["status"] }) {
+  const tone =
+    status === "active"
+      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+      : status === "interested"
+        ? "bg-blue-500/10 text-blue-700 dark:text-blue-300"
+        : status === "inactive"
+          ? "bg-muted text-muted-foreground"
+          : "bg-amber-500/10 text-amber-700 dark:text-amber-300";
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${tone}`}
+    >
+      {status}
+    </span>
+  );
+}
+
+function PriorityBadge({ priority }: { priority: AdminClient["priority"] }) {
+  const tone =
+    priority === "high"
+      ? "bg-rose-500/10 text-rose-700 dark:text-rose-300"
+      : priority === "medium"
+        ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+        : "bg-muted text-muted-foreground";
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${tone}`}
+    >
+      {priority}
     </span>
   );
 }

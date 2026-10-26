@@ -1,11 +1,9 @@
-import { redirect } from "next/navigation";
-
-import { Footer } from "@/components/footer";
-import { Navigation } from "@/components/navigation";
+import { ClientWorkspaceShell } from "@/components/auth/client-workspace-shell";
 import { SavedCalculationsList } from "@/app/history/saved-calculations-list";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createPageMetadata } from "@/lib/seo";
 import type { SavedCalculationRecord } from "@/features/calculators/saved/saved-calculations";
+import { requireClientAccess } from "@/lib/server/user-auth";
 
 export const metadata = createPageMetadata({
   title: "Saved financial plans",
@@ -13,13 +11,14 @@ export const metadata = createPageMetadata({
   path: "/history",
   noIndex: true,
 });
+export const dynamic = "force-dynamic";
 
 export default async function HistoryPage() {
+  await requireClientAccess("/history");
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
     return (
-      <>
-        <Navigation />
+      <ClientWorkspaceShell>
         <main className="px-content mx-auto min-h-[55vh] max-w-7xl py-12 sm:py-16">
           <p className="text-primary text-xs font-semibold tracking-[0.16em] uppercase">
             WealthTogether Investments
@@ -32,15 +31,9 @@ export default async function HistoryPage() {
             migration to enable your private planning history.
           </p>
         </main>
-        <Footer />
-      </>
+      </ClientWorkspaceShell>
     );
   }
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=%2Fhistory");
 
   const { data, error } = await supabase
     .from("saved_calculations")
@@ -55,8 +48,7 @@ export default async function HistoryPage() {
   const records = error ? [] : (data as unknown as SavedCalculationRecord[]);
 
   return (
-    <>
-      <Navigation />
+    <ClientWorkspaceShell>
       <main className="px-content mx-auto min-h-[55vh] max-w-7xl py-10 sm:py-16">
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -77,7 +69,6 @@ export default async function HistoryPage() {
           setupMessage={setupMessage}
         />
       </main>
-      <Footer />
-    </>
+    </ClientWorkspaceShell>
   );
 }

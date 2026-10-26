@@ -8,11 +8,11 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Settings2,
   UsersRound,
   X,
 } from "lucide-react";
 
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import type { AdminRole } from "@/lib/server/admin-auth";
@@ -21,6 +21,12 @@ const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/clients", label: "Clients", icon: UsersRound },
   { href: "/admin/consultations", label: "Consultations", icon: CalendarDays },
+  {
+    href: "/admin/settings",
+    label: "Admin settings",
+    icon: Settings2,
+    ownerOnly: true,
+  },
 ];
 
 export function AdminShell({
@@ -37,19 +43,24 @@ export function AdminShell({
   const [busy, setBusy] = useState(false);
 
   async function signOut() {
-    const supabase = createSupabaseBrowserClient();
-    if (!supabase) return;
     setBusy(true);
-    const { error } = await supabase.auth.signOut();
-    if (!error) window.location.assign("/admin/login");
-    setBusy(false);
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      if (response.ok) window.location.assign("/admin/login");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <div className="bg-muted/45 min-h-screen lg:grid lg:grid-cols-[250px_minmax(0,1fr)]">
       <aside className="border-border bg-card hidden border-r lg:fixed lg:inset-y-0 lg:flex lg:w-[250px] lg:flex-col">
         <Brand />
-        <Nav pathname={pathname} />
+        <Nav pathname={pathname} role={role} />
         <div className="border-border mt-auto border-t p-4">
           <div className="mb-3 min-w-0">
             <p className="truncate text-sm font-semibold">
@@ -80,7 +91,11 @@ export function AdminShell({
         </header>
         {open ? (
           <div className="border-border bg-card fixed inset-x-0 top-16 z-20 border-b p-4 shadow-lg lg:hidden">
-            <Nav pathname={pathname} onNavigate={() => setOpen(false)} />
+            <Nav
+              pathname={pathname}
+              role={role}
+              onNavigate={() => setOpen(false)}
+            />
             <div className="border-border mt-4 border-t pt-4">
               <p className="text-muted-foreground mb-3 text-xs">
                 {email} · {role}
@@ -126,29 +141,33 @@ function Brand({ compact = false }: { compact?: boolean }) {
 
 function Nav({
   pathname,
+  role,
   onNavigate,
 }: {
   pathname: string;
+  role: AdminRole;
   onNavigate?: () => void;
 }) {
   return (
     <nav aria-label="Admin navigation" className="space-y-1 p-3">
-      {navItems.map(({ href, label, icon: Icon }) => {
-        const active =
-          href === "/admin" ? pathname === href : pathname.startsWith(href);
-        return (
-          <Link
-            aria-current={active ? "page" : undefined}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-            href={href}
-            key={href}
-            onClick={onNavigate}
-          >
-            <Icon aria-hidden="true" className="size-[18px]" />
-            {label}
-          </Link>
-        );
-      })}
+      {navItems
+        .filter((item) => !item.ownerOnly || role === "owner")
+        .map(({ href, label, icon: Icon }) => {
+          const active =
+            href === "/admin" ? pathname === href : pathname.startsWith(href);
+          return (
+            <Link
+              aria-current={active ? "page" : undefined}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+              href={href}
+              key={href}
+              onClick={onNavigate}
+            >
+              <Icon aria-hidden="true" className="size-[18px]" />
+              {label}
+            </Link>
+          );
+        })}
     </nav>
   );
 }

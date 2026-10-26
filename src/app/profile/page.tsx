@@ -1,10 +1,10 @@
-import { redirect } from "next/navigation";
 import { CircleUserRound, ShieldCheck } from "lucide-react";
 
-import { AuthPage } from "@/components/auth/auth-page";
-import { ProfileForm } from "@/components/auth/auth-forms";
+import { AccountProfileForm } from "@/components/auth/account-profile-form";
+import { ClientWorkspaceShell } from "@/components/auth/client-workspace-shell";
+import { Card } from "@/components/ui/card";
 import { createPageMetadata } from "@/lib/seo";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireClientAccess } from "@/lib/server/user-auth";
 
 export const metadata = createPageMetadata({
   title: "Your profile",
@@ -12,65 +12,55 @@ export const metadata = createPageMetadata({
   path: "/profile",
   noIndex: true,
 });
+export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
-  const supabase = await createSupabaseServerClient();
-  if (!supabase) {
-    return (
-      <AuthPage
-        description="Add your Supabase project settings to enable account access."
-        eyebrow="Profile setup"
-        title="Connect your account."
-      >
-        <div className="border-border bg-muted text-muted-foreground rounded-xl border p-4 text-sm leading-6">
-          Set <code className="text-foreground">NEXT_PUBLIC_SUPABASE_URL</code>{" "}
-          and{" "}
-          <code className="text-foreground">
-            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-          </code>{" "}
-          in your local environment, then restart the app.
-        </div>
-      </AuthPage>
-    );
-  }
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=%2Fprofile");
-
-  const fullName =
-    typeof user.user_metadata.full_name === "string"
-      ? user.user_metadata.full_name
-      : "";
-  const displayName = fullName || user.email?.split("@")[0] || "there";
+  const identity = await requireClientAccess("/profile");
+  const displayName =
+    identity.profile.full_name ||
+    identity.email.split("@")[0] ||
+    "Your profile";
 
   return (
-    <>
-      <AuthPage
-        description="Manage the details connected to your WealthTogether account."
-        eyebrow="Your account"
-        title={`Welcome, ${displayName}.`}
-      >
-        <div className="bg-muted mb-7 flex items-center gap-3 rounded-2xl p-4">
-          <span className="bg-background text-foreground grid size-11 shrink-0 place-items-center rounded-xl">
-            <CircleUserRound aria-hidden="true" className="size-6" />
+    <ClientWorkspaceShell>
+      <div className="mx-auto max-w-4xl space-y-7">
+        <div>
+          <p className="text-primary text-xs font-semibold tracking-[0.16em] uppercase">
+            Account settings
+          </p>
+          <h1 className="font-display mt-2 text-3xl tracking-tight sm:text-4xl">
+            Your profile
+          </h1>
+          <p className="text-muted-foreground mt-3 text-sm leading-6">
+            Update the details connected to your WealthTogether account.
+          </p>
+        </div>
+        <Card className="flex items-center gap-3 p-4 sm:p-5">
+          <span className="bg-accent text-accent-foreground grid size-11 shrink-0 place-items-center rounded-xl">
+            {identity.profile.avatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                alt=""
+                className="size-11 rounded-xl object-cover"
+                src={identity.profile.avatar}
+              />
+            ) : (
+              <CircleUserRound aria-hidden="true" className="size-6" />
+            )}
           </span>
           <div className="min-w-0">
-            <p className="text-foreground truncate text-sm font-semibold">
-              {fullName || "Your profile"}
-            </p>
+            <p className="truncate text-sm font-semibold">{displayName}</p>
             <p className="text-muted-foreground truncate text-xs">
-              {user.email}
+              {identity.email}
             </p>
           </div>
-          <ShieldCheck
-            aria-hidden="true"
-            className="ml-auto size-5 shrink-0 text-emerald-600 dark:text-emerald-300"
-          />
-        </div>
-        <ProfileForm email={user.email ?? ""} initialName={fullName} />
-      </AuthPage>
-    </>
+          <span className="border-border text-muted-foreground ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs capitalize">
+            <ShieldCheck aria-hidden="true" className="text-primary size-3.5" />
+            {identity.role}
+          </span>
+        </Card>
+        <AccountProfileForm email={identity.email} profile={identity.profile} />
+      </div>
+    </ClientWorkspaceShell>
   );
 }

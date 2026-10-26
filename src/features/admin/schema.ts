@@ -14,6 +14,27 @@ export const clientInputSchema = z.object({
   goals: z.string().trim().max(3000).default(""),
   notes: z.string().trim().max(10000).default(""),
   followUpStatus: z.enum(["none", "due", "scheduled", "completed"]),
+  dateOfBirth: z.union([z.literal(""), z.iso.date()]).default(""),
+  income: z.coerce.number().finite().min(0).max(1_000_000_000).default(0),
+  riskProfile: z
+    .enum(["conservative", "moderate", "aggressive", "not_assessed"])
+    .default("not_assessed"),
+  status: z.enum(["lead", "interested", "active", "inactive"]).default("lead"),
+  priority: z.enum(["low", "medium", "high"]).default("medium"),
+  nextFollowUpAt: z
+    .string()
+    .max(40)
+    .refine(
+      (value) => !value || !Number.isNaN(new Date(value).getTime()),
+      "Enter a valid follow-up date.",
+    )
+    .default(""),
+  monthlyRevenue: z.coerce
+    .number()
+    .finite()
+    .min(0)
+    .max(1_000_000_000)
+    .default(0),
 });
 
 export const consultationInputSchema = z.object({
@@ -32,6 +53,22 @@ export type FollowUpStatus = ClientInput["followUpStatus"];
 export type ConsultationInput = z.infer<typeof consultationInputSchema>;
 
 export function clientInputToRecord(input: ClientInput) {
-  const { followUpStatus, ...fields } = input;
-  return { ...fields, follow_up_status: followUpStatus };
+  const {
+    followUpStatus,
+    dateOfBirth,
+    riskProfile,
+    nextFollowUpAt,
+    monthlyRevenue,
+    ...fields
+  } = input;
+  return {
+    ...fields,
+    follow_up_status: followUpStatus,
+    date_of_birth: dateOfBirth || null,
+    risk_profile: riskProfile,
+    next_follow_up_at: nextFollowUpAt
+      ? new Date(nextFollowUpAt).toISOString()
+      : null,
+    monthly_revenue: monthlyRevenue,
+  };
 }

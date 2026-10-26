@@ -29,6 +29,20 @@ In the Supabase SQL Editor, run the migrations in filename order:
 3. `supabase/migrations/20261026002000_contact_messages.sql`
 4. `supabase/migrations/20261026003000_public_rate_limits.sql`
 5. `supabase/migrations/20261026004000_client_crm.sql`
+6. `supabase/migrations/20261026005000_auth_profiles.sql`
+7. `supabase/migrations/20261026006000_crm_management.sql`
+8. `supabase/migrations/20261026007000_financial_assistant.sql`
+
+The auth profile migration creates the self-service `profiles` table and
+creates or synchronizes a profile for each Supabase Auth user. New accounts
+receive the `client` role. Admin access is granted only through
+`public.admin_users`; its protected trigger mirrors that role into the profile
+record. Add the production and preview callback URLs ending in
+`/auth/callback` to the Supabase Auth redirect allow list.
+Enable the Supabase email/password provider and email confirmations so new
+client accounts complete verification before signing in. Set the Supabase Site
+URL to the production origin; add local and preview callback URLs when those
+environments need to verify accounts or complete password recovery.
 
 The rate-limit migration is required for public form submissions. The RPC is
 available only to `service_role`; its table has row-level security enabled and
@@ -57,7 +71,7 @@ deployment.
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Auth, saved plans, and public forms                          | Browser-safe Supabase publishable key. The legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` is supported if needed.                                                  |
 | `SUPABASE_SERVICE_ROLE_KEY`            | Contact, consultation, persistent rate limits, and admin CRM | Server-only secret. It powers protected CRM APIs after the signed-in user passes the admin role check. Never prefix it with `NEXT_PUBLIC_`.                |
 | `OPENAI_API_KEY`                       | AI financial assistant                                       | Server-only OpenAI API key used by `/api/financial-assistant`. Never prefix it with `NEXT_PUBLIC_`.                                                        |
-| `OPENAI_MODEL`                         | AI financial assistant                                       | Optional model override. Defaults to `gpt-6-luna`.                                                                                                         |
+| `OPENAI_MODEL`                         | AI financial assistant                                       | Optional Responses API model override. Defaults to `gpt-4.1-mini`.                                                                                         |
 | `NEXT_PUBLIC_CONTACT_EMAIL`            | Contact links                                                | Public contact address.                                                                                                                                    |
 | `NEXT_PUBLIC_CONTACT_WHATSAPP`         | Contact and consultation links                               | Public phone number in international format.                                                                                                               |
 | `NEXT_PUBLIC_CONSULTATION_EMAIL`       | Consultation profile                                         | Public advisory email; the contact email is used as a fallback.                                                                                            |
@@ -73,17 +87,21 @@ Set public variables in **Production, Preview, and Development** as needed.
 The production build fails if `NEXT_PUBLIC_SITE_URL` is missing, not HTTPS, or
 still points at localhost or the `.example` placeholder. Keep the actual
 service-role key and Resend API key in Vercel’s encrypted server environment.
-The AI assistant also needs `OPENAI_API_KEY` and the Supabase rate-limit RPC.
-It limits requests to 8 per minute and 40 per day per client IP. Each request
-sends the current calculator snapshot and in-session chat context to the OpenAI
-Responses API with response storage disabled. Chat history is not saved in the
-application; the chat explains this data flow and asks users not to include
-personal or account details.
+The AI assistant also needs `OPENAI_API_KEY`, the Supabase rate-limit RPC, and
+migration `20261026007000_financial_assistant.sql`. It limits requests to 8
+per minute and 40 per day per client IP and user. Authenticated client accounts
+can use `/assistant`; each request sends the question and, only after explicit
+opt-in, a minimized planning snapshot to the OpenAI Responses API with response
+storage disabled. Conversation text is stored in private, per-user Supabase
+tables; the planning snapshot is not stored with chat history. The chat labels
+personal context sharing and offers a consultation link. Remind users not to
+enter personal identifiers in their questions; account identifiers are excluded
+from the optional planning snapshot.
 
 ## Provision admin access
 
-The CRM is available at `/admin`; it has no admin account creation page. Create
-the first account from Supabase Authentication using a trusted team email, then
+The CRM is available at `/admin`; it has no administrator self-registration
+page. Create the first account from Supabase Authentication using a trusted team email, then
 run this statement in the Supabase SQL editor, replacing the address:
 
 ```sql
@@ -98,7 +116,12 @@ client, consultation, and client-linked saved-plan data remain unavailable to
 browser database requests; admin APIs verify the session and role before using
 the server-only service key. The migration automatically links CRM client email
 addresses with matching signed-in accounts so their existing saved financial
-plans can be shown in the profile. Keep the service-role key server-only.
+plans can be shown in the profile. The management migration adds financial
+goals, investments, insurance, interaction history, tasks, and a private file
+bucket with signed downloads. Only non-sensitive Realtime invalidation events
+are broadcast to authenticated CRM administrators. Keep the service-role key
+server-only. Once the first owner is provisioned, additional registered users
+can be assigned admin, advisor, or viewer access at `/admin/settings`.
 
 ## Deploy and attach a domain
 
@@ -125,6 +148,9 @@ Production metadata, canonical links, sitemap, and social cards use
   read another user’s saved rows.
 - Submit test contact and consultation requests. Confirm they appear in the
   private Supabase tables and optional Resend notifications arrive.
+- Add a CRM client, record goals and investments, upload/download a private
+  document, complete a follow-up task, and verify the dashboard refreshes in an
+  open admin session. Export a multi-sheet Excel workbook and a client PDF.
 - Ask the calculator assistant to explain a result and compare the precomputed
   10% monthly-contribution scenario. Confirm the consultation link works.
 - Download a PDF report and export a chart PNG on desktop and mobile.

@@ -11,6 +11,7 @@ import {
   sameOriginError,
 } from "@/lib/server/request-security";
 import { createSupabaseAdminClient } from "@/lib/server/supabase-admin";
+import { publishCrmChanged } from "@/lib/server/crm-realtime";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -43,7 +44,17 @@ export async function GET(_request: NextRequest, { params }: Context) {
     if (error) throw error;
     if (!client) return json({ error: "Client not found." }, 404);
 
-    const [consultations, requests, plans] = await Promise.all([
+    const [
+      consultations,
+      requests,
+      plans,
+      goals,
+      investments,
+      insurance,
+      activities,
+      tasks,
+      documents,
+    ] = await Promise.all([
       supabase
         .from("crm_consultations")
         .select("id,topic,scheduled_at,status,notes,created_at")
@@ -68,14 +79,72 @@ export async function GET(_request: NextRequest, { params }: Context) {
             .order("updated_at", { ascending: false })
             .limit(100)
         : Promise.resolve({ data: [], error: null }),
+      supabase
+        .from("crm_client_goals")
+        .select("*")
+        .eq("client_id", id)
+        .order("target_date", { ascending: true, nullsFirst: false }),
+      supabase
+        .from("crm_client_investments")
+        .select("*")
+        .eq("client_id", id)
+        .order("investment_date", { ascending: false, nullsFirst: false }),
+      supabase
+        .from("crm_client_insurance")
+        .select("*")
+        .eq("client_id", id)
+        .order("renewal_date", { ascending: true, nullsFirst: false }),
+      supabase
+        .from("crm_client_activities")
+        .select("*")
+        .eq("client_id", id)
+        .order("occurred_at", { ascending: false })
+        .limit(200),
+      supabase
+        .from("crm_tasks")
+        .select("*")
+        .eq("client_id", id)
+        .order("due_at", { ascending: true, nullsFirst: false })
+        .limit(200),
+      supabase
+        .from("crm_client_documents")
+        .select("*")
+        .eq("client_id", id)
+        .order("created_at", { ascending: false }),
     ]);
-    if (consultations.error || requests.error || plans.error)
-      throw consultations.error ?? requests.error ?? plans.error;
+    const failed = [
+      consultations,
+      requests,
+      plans,
+      goals,
+      investments,
+      insurance,
+      activities,
+      tasks,
+      documents,
+    ].find((result) => result.error);
+    if (failed?.error) throw failed.error;
+    const documentRows = await Promise.all(
+      (documents.data ?? []).map(async (document) => {
+        const { data: signed } = await supabase.storage
+          .from("crm-client-documents")
+          .createSignedUrl(document.storage_path, 60 * 10, {
+            download: document.file_name,
+          });
+        return { ...document, download_url: signed?.signedUrl ?? null };
+      }),
+    );
     return json({
       client,
       consultations: consultations.data ?? [],
       requests: requests.data ?? [],
       plans: plans.data ?? [],
+      goals: goals.data ?? [],
+      investments: investments.data ?? [],
+      insurance: insurance.data ?? [],
+      activities: activities.data ?? [],
+      tasks: tasks.data ?? [],
+      documents: documentRows,
     });
   } catch {
     return json({ error: "This client profile could not be loaded." }, 503);
@@ -102,6 +171,13 @@ export async function PATCH(request: NextRequest, { params }: Context) {
   if (!supabase)
     return json({ error: "The admin data service is unavailable." }, 503);
   try {
+    const { data: previous, error: previousError } = await supabase
+      .from("crm_clients")
+      .select("status,follow_up_status,next_follow_up_at")
+      .eq("id", id)
+      .maybeSingle();
+    if (previousError) throw previousError;
+    if (!previous) return json({ error: "Client not found." }, 404);
     const { data, error } = await supabase
       .from("crm_clients")
       .update({
@@ -124,6 +200,44 @@ export async function PATCH(request: NextRequest, { params }: Context) {
       .update({ client_id: id })
       .eq("email", data.email)
       .is("client_id", null);
+    const activities: Array<{
+      client_id: string;
+      activity_type: string;
+      title: string;
+      details: string;
+      created_by: string;
+    }> = [];
+    const nextFollowUpAt = clientInputToRecord(parsed.data).next_follow_up_at;
+    const previousFollowUpTime = previous.next_follow_up_at
+      ? new Date(previous.next_follow_up_at).getTime()
+      : null;
+    const nextFollowUpTime = nextFollowUpAt
+      ? new Date(String(nextFollowUpAt)).getTime()
+      : null;
+    if (previous.status !== parsed.data.status) {
+      activities.push({
+        client_id: id,
+        activity_type: "status_change",
+        title: "Client status updated",
+        details: `${previous.status} → ${parsed.data.status}`,
+        created_by: access.userId,
+      });
+    }
+    if (
+      previous.follow_up_status !== parsed.data.followUpStatus ||
+      previousFollowUpTime !== nextFollowUpTime
+    ) {
+      activities.push({
+        client_id: id,
+        activity_type: "follow_up",
+        title: "Follow-up updated",
+        details: `${parsed.data.followUpStatus}${parsed.data.nextFollowUpAt ? ` · ${parsed.data.nextFollowUpAt}` : ""}`,
+        created_by: access.userId,
+      });
+    }
+    if (activities.length)
+      await supabase.from("crm_client_activities").insert(activities);
+    await publishCrmChanged();
     return json({ saved: true });
   } catch {
     return json({ error: "Client changes could not be saved." }, 503);
@@ -144,12 +258,24 @@ export async function DELETE(request: NextRequest, { params }: Context) {
   if (!supabase)
     return json({ error: "The admin data service is unavailable." }, 503);
   try {
+    const { data: documents, error: documentsError } = await supabase
+      .from("crm_client_documents")
+      .select("storage_path")
+      .eq("client_id", id);
+    if (documentsError) throw documentsError;
+    if (documents?.length) {
+      const { error: storageError } = await supabase.storage
+        .from("crm-client-documents")
+        .remove(documents.map((document) => document.storage_path));
+      if (storageError) throw storageError;
+    }
     const { error, count } = await supabase
       .from("crm_clients")
       .delete({ count: "exact" })
       .eq("id", id);
     if (error) throw error;
     if (!count) return json({ error: "Client not found." }, 404);
+    await publishCrmChanged();
     return json({ deleted: true });
   } catch {
     return json({ error: "This client could not be deleted." }, 503);

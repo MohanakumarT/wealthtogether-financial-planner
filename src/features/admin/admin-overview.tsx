@@ -1,23 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ArrowRight,
   CalendarClock,
-  CheckCheck,
+  CircleDollarSign,
   CircleUserRound,
   Clock3,
+  ListTodo,
   LoaderCircle,
+  PiggyBank,
   UsersRound,
 } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { fetchAdminJson } from "@/features/admin/api";
+import { OverviewCharts } from "@/features/admin/overview-charts";
 
 type OverviewData = {
   stats: {
     totalClients: number;
+    activeClients: number;
+    todayFollowUps: number;
+    monthlyRevenue: number;
+    totalAum: number;
+    pendingTasks: number;
     newEnquiries: number;
     bookedConsultations: number;
     completedConsultations: number;
@@ -34,6 +42,8 @@ type OverviewData = {
     created_at: string;
     client_id: string | null;
   }>;
+  assetAllocation: Array<{ name: string; value: number }>;
+  investmentTimeline: Array<{ month: string; label: string; value: number }>;
 };
 
 const metrics = [
@@ -44,24 +54,43 @@ const metrics = [
     tone: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
   },
   {
-    key: "newEnquiries",
-    label: "New enquiries",
+    key: "activeClients",
+    label: "Active clients",
     icon: CircleUserRound,
+    tone: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  },
+  {
+    key: "todayFollowUps",
+    label: "Today’s follow-ups",
+    icon: CalendarClock,
     tone: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
   },
   {
-    key: "bookedConsultations",
-    label: "Booked consultations",
-    icon: CalendarClock,
+    key: "monthlyRevenue",
+    label: "Monthly revenue",
+    icon: CircleDollarSign,
+    tone: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
+  },
+  {
+    key: "totalAum",
+    label: "Total AUM",
+    icon: PiggyBank,
     tone: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
   },
   {
-    key: "completedConsultations",
-    label: "Completed consultations",
-    icon: CheckCheck,
-    tone: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    key: "pendingTasks",
+    label: "Pending tasks",
+    icon: ListTodo,
+    tone: "bg-rose-500/10 text-rose-700 dark:text-rose-300",
   },
 ] as const;
+
+const money = (value: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(value);
 
 function readableDate(value: string) {
   const date = new Date(value);
@@ -77,7 +106,8 @@ function readableDate(value: string) {
 export function AdminOverview() {
   const [data, setData] = useState<OverviewData | null>(null);
   const [error, setError] = useState("");
-  useEffect(() => {
+  const load = useCallback(() => {
+    setError("");
     fetchAdminJson<OverviewData>("/api/admin/overview")
       .then(setData)
       .catch((reason: unknown) =>
@@ -88,6 +118,13 @@ export function AdminOverview() {
         ),
       );
   }, []);
+  useEffect(() => {
+    load();
+  }, [load]);
+  useEffect(() => {
+    window.addEventListener("crm:changed", load);
+    return () => window.removeEventListener("crm:changed", load);
+  }, [load]);
 
   return (
     <div className="space-y-7">
@@ -127,14 +164,18 @@ export function AdminOverview() {
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {metrics.map(({ key, label, icon: Icon, tone }) => (
           <Card className="p-5" key={key}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-muted-foreground text-sm">{label}</p>
                 <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums">
-                  {data?.stats[key] ?? "—"}
+                  {data?.stats[key] === undefined
+                    ? "—"
+                    : key === "monthlyRevenue" || key === "totalAum"
+                      ? money(data.stats[key])
+                      : data.stats[key].toLocaleString("en-IN")}
                 </p>
               </div>
               <span
@@ -144,11 +185,18 @@ export function AdminOverview() {
               </span>
             </div>
             <p className="text-muted-foreground mt-4 text-xs">
-              Updated from your client records
+              Protected CRM data · live updates
             </p>
           </Card>
         ))}
       </div>
+
+      {data ? (
+        <OverviewCharts
+          allocation={data.assetAllocation}
+          timeline={data.investmentTimeline}
+        />
+      ) : null}
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.75fr)]">
         <Card className="overflow-hidden">

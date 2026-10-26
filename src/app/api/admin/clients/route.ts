@@ -10,6 +10,7 @@ import {
   sameOriginError,
 } from "@/lib/server/request-security";
 import { createSupabaseAdminClient } from "@/lib/server/supabase-admin";
+import { publishCrmChanged } from "@/lib/server/crm-realtime";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,15 +37,14 @@ export async function GET(request: NextRequest) {
     .replace(/[^\p{L}\p{N}@.+\-\s]/gu, "")
     .slice(0, 80);
   const followUp = params.get("followUp");
+  const status = params.get("status");
+  const priority = params.get("priority");
+  const sort = params.get("sort");
+  const ascending = params.get("direction") === "asc";
   const from = (page - 1) * pageSize;
 
   try {
-    let query = supabase
-      .from("crm_clients")
-      .select(
-        "id,name,phone,email,city,occupation,goals,notes,follow_up_status,created_at,updated_at",
-        { count: "exact" },
-      );
+    let query = supabase.from("crm_clients").select("*", { count: "exact" });
     if (search) {
       const pattern = `%${search.replace(/[%_]/g, "\\$&")}%`;
       query = query.or(
@@ -57,8 +57,25 @@ export async function GET(request: NextRequest) {
     ) {
       query = query.eq("follow_up_status", followUp);
     }
+    if (
+      status &&
+      ["lead", "interested", "active", "inactive"].includes(status)
+    ) {
+      query = query.eq("status", status);
+    }
+    if (priority && ["low", "medium", "high"].includes(priority)) {
+      query = query.eq("priority", priority);
+    }
+    const sortColumn = [
+      "name",
+      "created_at",
+      "next_follow_up_at",
+      "updated_at",
+    ].includes(sort ?? "")
+      ? sort!
+      : "updated_at";
     const { data, count, error } = await query
-      .order("updated_at", { ascending: false })
+      .order(sortColumn, { ascending, nullsFirst: false })
       .range(from, from + pageSize - 1);
     if (error) throw error;
     return json({ clients: data ?? [], total: count ?? 0, page, pageSize });
@@ -107,6 +124,7 @@ export async function POST(request: NextRequest) {
       .update({ client_id: data.id })
       .eq("email", data.email)
       .is("client_id", null);
+    await publishCrmChanged();
     return json({ client: data }, 201);
   } catch {
     return json(

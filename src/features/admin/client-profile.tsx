@@ -27,6 +27,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { fetchAdminJson } from "@/features/admin/api";
 import {
+  ClientRecords,
+  type ClientActivityRecord,
+  type ClientDocumentRecord,
+  type ClientGoalRecord,
+  type ClientInsuranceRecord,
+  type ClientInvestmentRecord,
+  type ClientTaskRecord,
+} from "@/features/admin/client-records";
+import {
   ClientFormDialog,
   type AdminClient,
 } from "@/features/admin/client-form-dialog";
@@ -67,6 +76,12 @@ type ProfileResponse = {
   consultations: Consultation[];
   requests: Enquiry[];
   plans: Plan[];
+  goals: ClientGoalRecord[];
+  investments: ClientInvestmentRecord[];
+  insurance: ClientInsuranceRecord[];
+  activities: ClientActivityRecord[];
+  tasks: ClientTaskRecord[];
+  documents: ClientDocumentRecord[];
 };
 
 function showDate(value: string) {
@@ -78,6 +93,10 @@ function showDate(value: string) {
         month: "short",
         year: "numeric",
       });
+}
+function whatsappNumber(value: string) {
+  const digits = value.replace(/\D/g, "");
+  return digits.length === 10 ? `91${digits}` : digits;
 }
 function followUpLabel(status: FollowUpStatus) {
   return {
@@ -100,6 +119,7 @@ export function ClientProfile({ id }: { id: string }) {
 
   const load = useCallback(() => {
     setLoading(true);
+    setError("");
     fetchAdminJson<ProfileResponse>(`/api/admin/clients/${id}`)
       .then(setData)
       .catch((reason: unknown) =>
@@ -113,6 +133,10 @@ export function ClientProfile({ id }: { id: string }) {
   }, [id]);
   useEffect(() => {
     load();
+  }, [load]);
+  useEffect(() => {
+    window.addEventListener("crm:changed", load);
+    return () => window.removeEventListener("crm:changed", load);
   }, [load]);
 
   async function deleteClient() {
@@ -156,7 +180,14 @@ export function ClientProfile({ id }: { id: string }) {
       `Phone: ${data.client.phone}`,
       `City: ${data.client.city || "Not provided"}`,
       `Occupation: ${data.client.occupation || "Not provided"}`,
+      `Date of birth: ${data.client.date_of_birth || "Not provided"}`,
+      `Annual income: INR ${Number(data.client.income || 0).toLocaleString("en-IN")}`,
+      `Risk profile: ${data.client.risk_profile.replaceAll("_", " ")}`,
+      `Client status: ${data.client.status}`,
       `Follow-up: ${followUpLabel(data.client.follow_up_status)}`,
+      `Next follow-up: ${data.client.next_follow_up_at ? showDate(data.client.next_follow_up_at) : "Not scheduled"}`,
+      `Monthly revenue: INR ${Number(data.client.monthly_revenue || 0).toLocaleString("en-IN")}`,
+      `Tracked AUM: INR ${data.investments.reduce((sum, item) => sum + Number(item.current_value || 0), 0).toLocaleString("en-IN")}`,
       `Goals: ${data.client.goals || "Not recorded"}`,
       `Private notes: ${data.client.notes || "Not recorded"}`,
     ];
@@ -180,6 +211,11 @@ export function ClientProfile({ id }: { id: string }) {
           showDate(item.scheduled_at),
           item.status,
         ]),
+        ...data.activities.map((item) => [
+          item.title,
+          showDate(item.occurred_at),
+          item.activity_type.replaceAll("_", " "),
+        ]),
       ],
       theme: "striped",
       headStyles: { fillColor: [8, 27, 58] },
@@ -190,6 +226,61 @@ export function ClientProfile({ id }: { id: string }) {
     ).lastAutoTable?.finalY;
     autoTable(pdf, {
       startY: (consultationsBottom ?? y) + 24,
+      head: [["Goal", "Target", "Saved", "Target date"]],
+      body: data.goals.map((goal) => [
+        goal.title,
+        `INR ${Number(goal.target_amount).toLocaleString("en-IN")}`,
+        `INR ${Number(goal.current_amount).toLocaleString("en-IN")}`,
+        goal.target_date || "Not set",
+      ]),
+      theme: "striped",
+      headStyles: { fillColor: [8, 27, 58] },
+      styles: { fontSize: 9, cellPadding: 6 },
+    });
+    const goalsBottom = (
+      pdf as InstanceType<typeof jsPDF> & { lastAutoTable?: { finalY: number } }
+    ).lastAutoTable?.finalY;
+    autoTable(pdf, {
+      startY: (goalsBottom ?? y) + 24,
+      head: [
+        ["Investment", "Type", "Invested", "Current value", "Monthly SIP"],
+      ],
+      body: data.investments.map((item) => [
+        item.name,
+        item.investment_type,
+        `INR ${Number(item.invested_amount).toLocaleString("en-IN")}`,
+        `INR ${Number(item.current_value).toLocaleString("en-IN")}`,
+        `INR ${Number(item.monthly_sip).toLocaleString("en-IN")}`,
+      ]),
+      theme: "striped",
+      headStyles: { fillColor: [8, 27, 58] },
+      styles: { fontSize: 8, cellPadding: 5 },
+    });
+    const investmentsBottom = (
+      pdf as InstanceType<typeof jsPDF> & { lastAutoTable?: { finalY: number } }
+    ).lastAutoTable?.finalY;
+    autoTable(pdf, {
+      startY: (investmentsBottom ?? y) + 24,
+      head: [
+        ["Insurance", "Type", "Provider", "Cover", "Annual premium", "Renewal"],
+      ],
+      body: data.insurance.map((item) => [
+        item.policy_name,
+        item.insurance_type,
+        item.provider || "Not recorded",
+        `INR ${Number(item.cover_amount).toLocaleString("en-IN")}`,
+        `INR ${Number(item.annual_premium).toLocaleString("en-IN")}`,
+        item.renewal_date || "Not set",
+      ]),
+      theme: "striped",
+      headStyles: { fillColor: [8, 27, 58] },
+      styles: { fontSize: 8, cellPadding: 5 },
+    });
+    const insuranceBottom = (
+      pdf as InstanceType<typeof jsPDF> & { lastAutoTable?: { finalY: number } }
+    ).lastAutoTable?.finalY;
+    autoTable(pdf, {
+      startY: (insuranceBottom ?? y) + 24,
       head: [["Saved financial plans", "Calculator", "Last updated"]],
       body: data.plans.map((plan) => [
         plan.name,
@@ -256,6 +347,15 @@ export function ClientProfile({ id }: { id: string }) {
       notes: item.notes,
       type: "Team record",
     })),
+    ...data.activities.map((item) => ({
+      id: `a-${item.id}`,
+      topic: item.title,
+      date: item.occurred_at,
+      status: "recorded",
+      details: item.activity_type.replaceAll("_", " "),
+      notes: item.details,
+      type: "Interaction",
+    })),
   ].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 
   return (
@@ -295,11 +395,41 @@ export function ClientProfile({ id }: { id: string }) {
                 <p className="mt-2 text-sm text-white/65">
                   Client since {showDate(client.created_at)}
                 </p>
+                <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/80 capitalize">
+                  <span className="rounded-full bg-white/10 px-2.5 py-1">
+                    {client.status}
+                  </span>
+                  <span className="rounded-full bg-white/10 px-2.5 py-1">
+                    {client.priority} priority
+                  </span>
+                  <span className="rounded-full bg-white/10 px-2.5 py-1">
+                    {followUpLabel(client.follow_up_status)}
+                  </span>
+                </p>
               </div>
             </div>
-            <span className="inline-flex w-fit rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
-              {followUpLabel(client.follow_up_status)}
-            </span>
+            <div className="flex flex-wrap gap-2">
+              <a
+                className="inline-flex h-9 items-center rounded-lg bg-white/10 px-3 text-xs font-semibold text-white hover:bg-white/15"
+                href={`https://wa.me/${whatsappNumber(client.phone)}`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                WhatsApp
+              </a>
+              <a
+                className="inline-flex h-9 items-center rounded-lg bg-white/10 px-3 text-xs font-semibold text-white hover:bg-white/15"
+                href={`mailto:${client.email}`}
+              >
+                Email
+              </a>
+              <a
+                className="inline-flex h-9 items-center rounded-lg bg-white/10 px-3 text-xs font-semibold text-white hover:bg-white/15"
+                href={`tel:${client.phone}`}
+              >
+                Call
+              </a>
+            </div>
           </div>
         </div>
         <div className="grid gap-5 px-5 py-6 sm:grid-cols-2 sm:px-8 lg:grid-cols-4">
@@ -326,6 +456,34 @@ export function ClientProfile({ id }: { id: string }) {
             value={client.occupation || "Not set"}
           />
         </div>
+        <div className="border-border grid gap-4 border-t px-5 py-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-4">
+          <ContactItem
+            icon={CalendarClock}
+            label="Date of birth"
+            value={
+              client.date_of_birth ? showDate(client.date_of_birth) : "Not set"
+            }
+          />
+          <ContactItem
+            icon={BriefcaseBusiness}
+            label="Annual income"
+            value={`₹${Number(client.income || 0).toLocaleString("en-IN")}`}
+          />
+          <ContactItem
+            icon={Shield}
+            label="Risk profile"
+            value={client.risk_profile.replaceAll("_", " ")}
+          />
+          <ContactItem
+            icon={CircleAlert}
+            label="Next follow-up"
+            value={
+              client.next_follow_up_at
+                ? showDate(client.next_follow_up_at)
+                : "Not scheduled"
+            }
+          />
+        </div>
       </Card>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
@@ -348,13 +506,9 @@ export function ClientProfile({ id }: { id: string }) {
           <Card className="overflow-hidden">
             <div className="border-border flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4 sm:px-6">
               <div>
-                <SectionHeading
-                  icon={CalendarClock}
-                  title="Consultation history"
-                />
+                <SectionHeading icon={CalendarClock} title="Client timeline" />
                 <p className="text-muted-foreground mt-1 pl-8 text-xs">
-                  {allHistory.length} recorded conversation
-                  {allHistory.length === 1 ? "" : "s"}
+                  Consultations, enquiries, and every recorded interaction
                 </p>
               </div>
               <Button
@@ -477,6 +631,17 @@ export function ClientProfile({ id }: { id: string }) {
           </Card>
         </div>
       </div>
+
+      <ClientRecords
+        activities={data.activities}
+        clientId={client.id}
+        documents={data.documents}
+        goals={data.goals}
+        insurance={data.insurance}
+        investments={data.investments}
+        onRefresh={load}
+        tasks={data.tasks}
+      />
 
       {editOpen ? (
         <ClientFormDialog

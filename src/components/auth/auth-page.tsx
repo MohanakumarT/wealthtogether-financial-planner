@@ -52,7 +52,7 @@ export function AuthPage({
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-md">
+        <section className="mx-auto w-full max-w-md min-w-0">
           <div className="border-border bg-card shadow-navy/5 rounded-3xl border p-6 shadow-xl sm:p-9">
             <div className="mb-7 lg:hidden">
               <Link

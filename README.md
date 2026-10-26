@@ -83,14 +83,21 @@ contact and consultation table migrations.
 
 ## AI financial assistant
 
-Each calculator page includes the WealthTogether AI assistant. It explains the
-active calculator’s current inputs and projections, keeps a short in-page chat
-history, and offers a consultation link. Its responses are educational, not
-personalized financial advice. To enable it, set the server-only
-`OPENAI_API_KEY` (optionally `OPENAI_MODEL`) and apply the rate-limit migration
-above. The assistant sends the current calculator snapshot and chat context to
-the OpenAI Responses API with response storage disabled; the application does
-not save the chat. Users are asked not to include personal or account details.
+The authenticated `/assistant` workspace provides private conversation history,
+Markdown responses, planning summaries, scenario illustrations, and a printable
+report. It can explain calculator snapshots and, only after the user opts in,
+send a minimized planning snapshot (age, cash flow, goal types, amounts and
+dates without goal labels, portfolio totals, and emergency-fund estimate) to the
+OpenAI Responses API.
+Account names, email addresses, phone numbers, and dates of birth are excluded
+from that snapshot. Users should avoid including identifiers in chat messages.
+The snapshot is sent only for a response and is not stored with chat messages.
+Conversation text is stored in private `assistant_conversations` and
+`assistant_messages` tables. Set the server-only `OPENAI_API_KEY` (optionally
+`OPENAI_MODEL`) and apply the rate-limit migration and
+`supabase/migrations/20261026007000_financial_assistant.sql`. Responses are
+educational and do not recommend securities or mutual funds. Calculator chat
+requires an authenticated client account.
 
 ## Portfolio tracker
 
@@ -119,19 +126,34 @@ marked noindex.
 ## Client CRM
 
 The private `/admin` workspace requires an authenticated Supabase account with
-an explicit row in `public.admin_users`. It supports client profiles, searchable
-and paginated client records, follow-up statuses, consultation history, linked
-saved calculations, PDF client reports, CSV export, and enquiry/consultation
-status tracking. CRM records are served through server routes guarded by the
-admin role check; browser clients never receive the service-role key.
+an explicit row in `public.admin_users`. It includes the client dashboard,
+search/filter/sort/pagination, personal and financial profiles, goals,
+investments, insurance, tasks, follow-up tracking, consultation and interaction
+timeline, private document uploads, linked saved calculations, branded PDF
+reports, multi-sheet Excel export, and owner-managed staff roles. Dashboard
+financial summaries are computed in a server-only database function. Private
+Realtime events contain only an invalidation signal; client data stays behind
+admin-checked API routes, and browser clients never receive the service-role key.
 
 Apply `supabase/migrations/20261026004000_client_crm.sql` after the existing
-migrations. Create the first trusted admin account in Supabase Authentication,
-then run the example `admin_users` insert at the bottom of that migration using
-the account's email. The migration supports `owner`, `admin`, `advisor`, and
-`viewer` roles. The CRM has no administrator sign-up flow; assignments must be
-made from a trusted Supabase SQL session. A client's existing saved plans are
-linked automatically when their CRM email matches their WealthTogether account.
+migrations, then `supabase/migrations/20261026005000_auth_profiles.sql` and
+`supabase/migrations/20261026006000_crm_management.sql` and
+`supabase/migrations/20261026007000_financial_assistant.sql`. These create the
+financial client record tables, private document bucket, secure Realtime
+invalidation policies, server-only dashboard summary, and private assistant
+conversation history. Set the Supabase Auth
+Site URL and allow-list the application callback URL ending in `/auth/callback` for
+email verification and password recovery. Enable Supabase email/password
+authentication and confirmation emails. Create the first trusted admin account
+in Supabase Authentication, then run the example `admin_users` insert at the
+bottom of the CRM migration using the account's email. The migration supports
+`owner`, `admin`, `advisor`, and `viewer` roles. The CRM has no administrator
+sign-up flow; provision the first owner from a trusted Supabase SQL session.
+A client's existing saved plans are linked automatically when their CRM email
+matches their WealthTogether account. After provisioning the first owner,
+additional registered accounts can be assigned admin, advisor, or read-only
+viewer access from `/admin/settings`. Files are limited to PDFs, Excel files,
+and common images up to 10 MB; downloads use short-lived signed URLs.
 
 ## Project structure
 
@@ -146,7 +168,7 @@ src/
     providers.tsx      Theme provider
   features/
     calculators/       Calculator contract, hooks, shared UI, and calculator modules
-    financial-assistant/ Calculator context, chat UI, and assistant hook
+    financial-assistant/ Authenticated AI planning workspace, context, and chat UI
     portfolio/         Local holdings repository, tracker UI, charts, and PDF export
     family/            Household profiles, local finance repository, dashboard, and charts
     admin/             Private CRM forms, dashboards, tables, and client profiles

@@ -1,19 +1,14 @@
 import { Landmark } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { AuthNavigationActions } from "@/components/auth/auth-navigation-actions";
 
 const links = [
-  { label: "Features", href: "/#features" },
-  { label: "Calculator categories", href: "/#calculators" },
-  { label: "Why us", href: "/#why" },
-  { label: "FAQ", href: "/#faq" },
-  { label: "Consultation", href: "/consultation" },
+  { label: "Home", href: "/" },
+  { label: "Calculators", href: "/#calculators" },
+  { label: "About", href: "/#why" },
   { label: "Contact", href: "/contact" },
-  { label: "Portfolio tracker", href: "/portfolio" },
-  { label: "Family dashboard", href: "/family" },
-  { label: "Saved plans", href: "/history" },
 ];
 
 function NavigationLinks({
@@ -31,48 +26,6 @@ function NavigationLinks({
         </Link>
       ))}
     </div>
-  );
-}
-
-function AccountLinks({ mobile = false }: { mobile?: boolean }) {
-  if (mobile) {
-    return (
-      <div className="flex shrink-0 items-center gap-4">
-        <Link
-          className="text-muted-foreground shrink-0 text-xs"
-          href="/profile"
-        >
-          My account
-        </Link>
-        <Link
-          className="text-muted-foreground shrink-0 text-xs"
-          href="/auth/sign-up"
-        >
-          Create account
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <Button
-        asChild
-        className="hidden sm:inline-flex"
-        size="sm"
-        variant="ghost"
-      >
-        <Link href="/profile">My account</Link>
-      </Button>
-      <Button
-        asChild
-        className="hidden sm:inline-flex"
-        size="sm"
-        variant="gold"
-      >
-        <Link href="/auth/sign-up">Create account</Link>
-      </Button>
-    </>
   );
 }
 
@@ -106,15 +59,15 @@ export function Navigation() {
         />
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <AccountLinks />
+          <AuthNavigationActions />
         </div>
       </nav>
-      <div className="px-content mx-auto flex max-w-7xl gap-6 overflow-x-auto pb-3 lg:hidden">
+      <div className="px-content mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-2 pb-3 lg:hidden">
         <NavigationLinks
-          className="flex shrink-0 items-center gap-6"
-          linkClassName="text-muted-foreground hover:text-foreground shrink-0 text-xs transition-colors"
+          className="flex flex-wrap items-center gap-x-4 gap-y-2"
+          linkClassName="text-muted-foreground hover:text-foreground text-xs transition-colors"
         />
-        <AccountLinks mobile />
+        <AuthNavigationActions mobile />
       </div>
     </header>
   );

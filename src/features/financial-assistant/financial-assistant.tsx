@@ -218,9 +218,22 @@ export function FinancialAssistant({
 
           <div className="border-border space-y-3 border-t px-4 pt-3 pb-[max(.75rem,env(safe-area-inset-bottom))]">
             {error ? (
-              <p className="text-destructive text-xs leading-5" role="alert">
-                {error}
-              </p>
+              <div className="space-y-2" role="alert">
+                <p className="text-destructive text-xs leading-5">{error}</p>
+                {error.toLowerCase().includes("sign in") ? (
+                  <Button
+                    asChild
+                    className="h-8 px-3 text-xs"
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Link href="/auth/login?next=%2Fassistant">
+                      Sign in for private planning chat
+                      <ArrowUpRight aria-hidden="true" className="size-3.5" />
+                    </Link>
+                  </Button>
+                ) : null}
+              </div>
             ) : null}
             <form className="flex items-end gap-2" onSubmit={onSubmit}>
               <label className="sr-only" htmlFor="financial-assistant-message">

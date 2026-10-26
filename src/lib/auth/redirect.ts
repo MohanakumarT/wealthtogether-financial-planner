@@ -1,6 +1,6 @@
 export function safeRedirectPath(
   path: string | null | undefined,
-  fallback = "/profile",
+  fallback = "/dashboard",
 ) {
   if (!path || !path.startsWith("/") || path.startsWith("//")) {
     return fallback;

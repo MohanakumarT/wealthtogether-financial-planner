@@ -9,6 +9,7 @@ export const metadata = {
   title: "Admin sign in | WealthTogether",
   robots: { index: false, follow: false },
 };
+export const dynamic = "force-dynamic";
 
 export default async function AdminLoginPage() {
   if (await getAdminAccess()) redirect("/admin");

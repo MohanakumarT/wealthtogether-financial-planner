@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -8,11 +9,15 @@ import { AlertCircle, LoaderCircle, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  createSupabaseBrowserClient,
+  setRememberMe,
+} from "@/lib/supabase/client";
 
 const schema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
   password: z.string().min(1, "Enter your password."),
+  rememberMe: z.boolean(),
 });
 type Values = z.infer<typeof schema>;
 
@@ -24,15 +29,23 @@ export function AdminLoginForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Values>({ resolver: zodResolver(schema) });
+  } = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: { rememberMe: true },
+  });
 
   async function submit(values: Values) {
     if (!supabase) return;
     setBusy(true);
     setMessage("");
+    setRememberMe(values.rememberMe);
     try {
-      const { error } = await supabase.auth.signInWithPassword(values);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
       if (error) {
+        setRememberMe(false);
         setMessage(
           "We couldn't sign you in. Check your details and try again.",
         );
@@ -41,11 +54,13 @@ export function AdminLoginForm() {
       const access = await fetch("/api/admin/session", { cache: "no-store" });
       if (!access.ok) {
         await supabase.auth.signOut();
+        setRememberMe(false);
         setMessage("This account does not have administrator access.");
         return;
       }
       window.location.assign("/admin");
     } catch {
+      setRememberMe(false);
       setMessage(
         "The sign-in service could not be reached. Try again shortly.",
       );
@@ -76,6 +91,22 @@ export function AdminLoginForm() {
         {...register("password")}
         type="password"
       />
+      <label className="text-muted-foreground flex items-center gap-2.5 text-sm">
+        <input
+          className="accent-primary border-border size-4 rounded"
+          type="checkbox"
+          {...register("rememberMe")}
+        />
+        Remember me on this device
+      </label>
+      <div className="flex justify-end">
+        <Link
+          className="text-muted-foreground hover:text-foreground text-xs underline underline-offset-4"
+          href="/auth/forgot-password"
+        >
+          Forgot password?
+        </Link>
+      </div>
       {message ? (
         <p
           className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-xl px-4 py-3 text-sm"

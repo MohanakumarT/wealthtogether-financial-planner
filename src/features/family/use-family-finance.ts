@@ -20,7 +20,7 @@ type State = {
   warning: string | null;
 };
 
-export function useFamilyFinance() {
+export function useFamilyFinance(userId: string) {
   const [state, setState] = useState<State>(() => ({
     hydrated: false,
     data: createFamilyDefaults(),
@@ -34,7 +34,7 @@ export function useFamilyFinance() {
 
   useEffect(() => {
     const refresh = () => {
-      const loaded = localFamilyFinanceRepository.load();
+      const loaded = localFamilyFinanceRepository.load(userId);
       const next = {
         hydrated: true,
         data: loaded.data,
@@ -44,29 +44,38 @@ export function useFamilyFinance() {
       ref.current = next;
       setState(next);
     };
+    if (!userId) return;
     refresh();
-    return localFamilyFinanceRepository.subscribe(refresh);
-  }, []);
+    return localFamilyFinanceRepository.subscribe(userId, refresh);
+  }, [userId]);
 
-  const persist = useCallback((data: FamilyFinanceDocument) => {
-    try {
-      const parsed = familyFinanceDocumentSchema.parse(data);
-      localFamilyFinanceRepository.save(parsed);
-      const next = { hydrated: true, data: parsed, error: null, warning: null };
-      ref.current = next;
-      setState(next);
-      return true;
-    } catch {
-      const next = {
-        ...ref.current,
-        error:
-          "These changes could not be saved in this browser. Check available storage and try again.",
-      };
-      ref.current = next;
-      setState(next);
-      return false;
-    }
-  }, []);
+  const persist = useCallback(
+    (data: FamilyFinanceDocument) => {
+      try {
+        const parsed = familyFinanceDocumentSchema.parse(data);
+        localFamilyFinanceRepository.save(userId, parsed);
+        const next = {
+          hydrated: true,
+          data: parsed,
+          error: null,
+          warning: null,
+        };
+        ref.current = next;
+        setState(next);
+        return true;
+      } catch {
+        const next = {
+          ...ref.current,
+          error:
+            "These changes could not be saved in this browser. Check available storage and try again.",
+        };
+        ref.current = next;
+        setState(next);
+        return false;
+      }
+    },
+    [userId],
+  );
 
   const updateProfile = useCallback(
     (

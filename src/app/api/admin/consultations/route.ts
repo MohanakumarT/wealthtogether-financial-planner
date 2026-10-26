@@ -11,6 +11,7 @@ import {
   sameOriginError,
 } from "@/lib/server/request-security";
 import { createSupabaseAdminClient } from "@/lib/server/supabase-admin";
+import { publishCrmChanged } from "@/lib/server/crm-realtime";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -93,6 +94,7 @@ export async function POST(request: NextRequest) {
       .select("id")
       .single();
     if (error) throw error;
+    await publishCrmChanged();
     return json({ id: data.id }, 201);
   } catch {
     return json({ error: "This consultation could not be saved." }, 503);
@@ -156,6 +158,7 @@ export async function PATCH(request: NextRequest) {
       .update({ status: parsed.data.status })
       .eq("id", parsed.data.id);
     if (error) throw error;
+    await publishCrmChanged();
     return json({ saved: true });
   } catch {
     return json(

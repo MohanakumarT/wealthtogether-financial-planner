@@ -118,9 +118,9 @@ function getProfileNetWorth(
   );
 }
 
-export function FamilyDashboard() {
-  const family = useFamilyFinance();
-  const portfolio = usePortfolio();
+export function FamilyDashboard({ userId }: { userId: string }) {
+  const family = useFamilyFinance(userId);
+  const portfolio = usePortfolio(userId);
   const [selectedId, setSelectedId] = useState<FamilyProfileId>("self");
   const profiles = family.data.profiles;
   const activeProfile =

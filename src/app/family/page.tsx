@@ -1,7 +1,7 @@
-import { Footer } from "@/components/footer";
-import { Navigation } from "@/components/navigation";
+import { ClientWorkspaceShell } from "@/components/auth/client-workspace-shell";
 import { FamilyDashboard } from "@/features/family/family-dashboard";
 import { createPageMetadata } from "@/lib/seo";
+import { requireClientAccess } from "@/lib/server/user-auth";
 
 export const metadata = createPageMetadata({
   title: "Family financial dashboard",
@@ -10,15 +10,15 @@ export const metadata = createPageMetadata({
   path: "/family",
   noIndex: true,
 });
+export const dynamic = "force-dynamic";
 
-export default function FamilyPage() {
+export default async function FamilyPage() {
+  const identity = await requireClientAccess("/family");
   return (
-    <>
-      <Navigation />
+    <ClientWorkspaceShell>
       <main className="px-content mx-auto min-h-[55vh] max-w-7xl py-10 sm:py-14">
-        <FamilyDashboard />
+        <FamilyDashboard key={identity.id} userId={identity.id} />
       </main>
-      <Footer />
-    </>
+    </ClientWorkspaceShell>
   );
 }

@@ -23,7 +23,7 @@ const initialState: PortfolioState = {
   warning: null,
 };
 
-export function usePortfolio() {
+export function usePortfolio(userId: string) {
   const [state, setState] = useState(initialState);
   const stateRef = useRef(state);
 
@@ -33,7 +33,7 @@ export function usePortfolio() {
 
   useEffect(() => {
     const refresh = () => {
-      const loaded = localPortfolioRepository.load();
+      const loaded = localPortfolioRepository.load(userId);
       const next: PortfolioState = {
         hydrated: true,
         holdings: loaded.holdings,
@@ -43,33 +43,37 @@ export function usePortfolio() {
       stateRef.current = next;
       setState(next);
     };
+    if (!userId) return;
     refresh();
-    return localPortfolioRepository.subscribe(refresh);
-  }, []);
+    return localPortfolioRepository.subscribe(userId, refresh);
+  }, [userId]);
 
-  const persist = useCallback((holdings: PortfolioHolding[]) => {
-    try {
-      localPortfolioRepository.save(holdings);
-      const next: PortfolioState = {
-        hydrated: true,
-        holdings,
-        error: null,
-        warning: null,
-      };
-      stateRef.current = next;
-      setState(next);
-      return true;
-    } catch {
-      const next = {
-        ...stateRef.current,
-        error:
-          "Your changes could not be saved in this browser. Check the available storage and try again.",
-      };
-      stateRef.current = next;
-      setState(next);
-      return false;
-    }
-  }, []);
+  const persist = useCallback(
+    (holdings: PortfolioHolding[]) => {
+      try {
+        localPortfolioRepository.save(userId, holdings);
+        const next: PortfolioState = {
+          hydrated: true,
+          holdings,
+          error: null,
+          warning: null,
+        };
+        stateRef.current = next;
+        setState(next);
+        return true;
+      } catch {
+        const next = {
+          ...stateRef.current,
+          error:
+            "Your changes could not be saved in this browser. Check the available storage and try again.",
+        };
+        stateRef.current = next;
+        setState(next);
+        return false;
+      }
+    },
+    [userId],
+  );
 
   const add = useCallback(
     (input: PortfolioHoldingInput) => {

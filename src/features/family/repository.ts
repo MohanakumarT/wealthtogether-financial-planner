@@ -3,6 +3,10 @@ import {
   createFamilyDefaults,
   type FamilyFinanceDocument,
 } from "@/features/family/model";
+import {
+  claimLegacyLocalData,
+  getUserStorageKey,
+} from "@/lib/auth/local-data-scope";
 
 const storageKey = "wealthtogether.family-finance.v1";
 
@@ -12,17 +16,24 @@ export type FamilyLoadResult = {
 };
 
 export interface FamilyFinanceRepository {
-  load(): FamilyLoadResult;
-  save(data: FamilyFinanceDocument): void;
-  subscribe(listener: () => void): () => void;
+  load(userId: string): FamilyLoadResult;
+  save(userId: string, data: FamilyFinanceDocument): void;
+  subscribe(userId: string, listener: () => void): () => void;
 }
 
 export const localFamilyFinanceRepository: FamilyFinanceRepository = {
-  load() {
-    if (typeof window === "undefined") return { data: createFamilyDefaults() };
+  load(userId) {
+    if (typeof window === "undefined" || !userId)
+      return { data: createFamilyDefaults() };
+    const scopedStorageKey = getUserStorageKey(storageKey, userId);
+    const ownsLegacyData = claimLegacyLocalData(userId);
     let raw: string | null;
     try {
-      raw = window.localStorage.getItem(storageKey);
+      raw = window.localStorage.getItem(scopedStorageKey);
+      if (!raw && ownsLegacyData) {
+        raw = window.localStorage.getItem(storageKey);
+        if (raw) window.localStorage.setItem(scopedStorageKey, raw);
+      }
     } catch {
       return {
         data: createFamilyDefaults(),
@@ -48,16 +59,20 @@ export const localFamilyFinanceRepository: FamilyFinanceRepository = {
       };
     }
   },
-  save(data) {
-    if (typeof window === "undefined")
+  save(userId, data) {
+    if (typeof window === "undefined" || !userId)
       throw new Error("Family storage is only available in a browser.");
     const parsed = familyFinanceDocumentSchema.parse(data);
-    window.localStorage.setItem(storageKey, JSON.stringify(parsed));
+    window.localStorage.setItem(
+      getUserStorageKey(storageKey, userId),
+      JSON.stringify(parsed),
+    );
   },
-  subscribe(listener) {
+  subscribe(userId, listener) {
     if (typeof window === "undefined") return () => undefined;
+    const scopedStorageKey = getUserStorageKey(storageKey, userId);
     const onStorage = (event: StorageEvent) => {
-      if (event.key === storageKey || event.key === null) listener();
+      if (event.key === scopedStorageKey || event.key === null) listener();
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);

@@ -54,9 +54,9 @@ function LoadingPortfolio() {
   );
 }
 
-export function PortfolioTracker() {
-  const portfolio = usePortfolio();
-  const family = useFamilyFinance();
+export function PortfolioTracker({ userId }: { userId: string }) {
+  const portfolio = usePortfolio(userId);
+  const family = useFamilyFinance(userId);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<PortfolioHolding | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);

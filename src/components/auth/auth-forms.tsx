@@ -9,7 +9,10 @@ import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  createSupabaseBrowserClient,
+  setRememberMe,
+} from "@/lib/supabase/client";
 import { safeRedirectPath } from "@/lib/auth/redirect";
 
 const emailSchema = z.string().trim().email("Enter a valid email address.");
@@ -30,6 +33,7 @@ const signupSchema = z
 const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, "Enter your password."),
+  rememberMe: z.boolean(),
 });
 const emailOnlySchema = z.object({ email: emailSchema });
 const passwordUpdateSchema = z
@@ -94,7 +98,7 @@ function FormMessage({
       ) : (
         <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
       )}
-      <span>{message}</span>
+      <span className="min-w-0 break-words">{message}</span>
     </div>
   );
 }
@@ -126,7 +130,7 @@ function SubmitButton({
 
 function ConfigNotice() {
   return (
-    <FormMessage message="Supabase is not configured yet. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to your local environment, then restart the app." />
+    <FormMessage message="Supabase isn’t configured. Add your Supabase URL and publishable key in the project environment, then restart the app." />
   );
 }
 
@@ -151,7 +155,7 @@ export function SignupForm() {
         password: values.password,
         options: {
           data: { full_name: values.fullName },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=%2Fprofile`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=%2Fdashboard`,
         },
       });
       if (error) {
@@ -160,7 +164,7 @@ export function SignupForm() {
         return;
       }
       if (data.session) {
-        window.location.assign("/profile");
+        window.location.assign("/dashboard");
         return;
       }
       setMessage(
@@ -247,22 +251,37 @@ export function LoginForm({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
+  } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { rememberMe: true },
+  });
 
   async function submit(values: LoginValues) {
     if (!supabase) return;
     setBusy(true);
     setMessage("");
+    setRememberMe(values.rememberMe);
     try {
-      const { error } = await supabase.auth.signInWithPassword(values);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
       if (error) {
+        setRememberMe(false);
         setMessage(
           "We couldn’t sign you in with those details. Check your email and password, then try again.",
         );
         return;
       }
-      window.location.assign(safeRedirectPath(nextPath));
+      const response = await fetch("/api/auth/session", { cache: "no-store" });
+      const body = (await response.json()) as {
+        user?: { role?: "admin" | "client" };
+      };
+      window.location.assign(
+        body.user?.role === "admin" ? "/admin" : safeRedirectPath(nextPath),
+      );
     } catch {
+      setRememberMe(false);
       setMessage(
         "We couldn’t reach the authentication service. Check your connection and try again.",
       );
@@ -302,6 +321,14 @@ export function LoginForm({
           type="password"
         />
       </div>
+      <label className="text-muted-foreground flex items-center gap-2.5 text-sm">
+        <input
+          className="accent-primary border-border size-4 rounded"
+          type="checkbox"
+          {...register("rememberMe")}
+        />
+        Remember me on this device
+      </label>
       {message ? <FormMessage message={message} /> : null}
       <SubmitButton busy={busy} disabled={!supabase}>
         Sign in
@@ -446,114 +473,5 @@ export function UpdatePasswordForm() {
         Update password
       </SubmitButton>
     </form>
-  );
-}
-
-export function ProfileForm({
-  initialName,
-  email,
-}: {
-  initialName: string;
-  email: string;
-}) {
-  const [name, setName] = useState(initialName);
-  const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const supabase = createSupabaseBrowserClient();
-
-  async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const trimmedName = name.trim();
-    if (trimmedName.length < 2 || trimmedName.length > 80) {
-      setMessage("Your name must be between 2 and 80 characters.");
-      setSuccess(false);
-      return;
-    }
-    if (!supabase) return;
-    setBusy(true);
-    setMessage("");
-    try {
-      const { error } = await supabase.auth.updateUser({
-        data: { full_name: trimmedName },
-      });
-      setMessage(error ? error.message : "Your profile has been updated.");
-      setSuccess(!error);
-    } catch {
-      setMessage(
-        "We couldn’t reach the authentication service. Check your connection and try again.",
-      );
-      setSuccess(false);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function signOut() {
-    if (!supabase) return;
-    setBusy(true);
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (!error) {
-        window.location.assign("/");
-        return;
-      }
-      setMessage(error.message);
-      setSuccess(false);
-    } catch {
-      setMessage(
-        "We couldn’t reach the authentication service. Check your connection and try again.",
-      );
-      setSuccess(false);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="space-y-8">
-      <form className="space-y-5" onSubmit={saveProfile}>
-        <InputField
-          autoComplete="name"
-          label="Full name"
-          maxLength={80}
-          minLength={2}
-          onChange={(event) => setName(event.target.value)}
-          required
-          value={name}
-        />
-        <InputField
-          autoComplete="email"
-          label="Email address"
-          readOnly
-          value={email}
-        />
-        {message ? <FormMessage message={message} success={success} /> : null}
-        <Button
-          className="w-full"
-          disabled={busy}
-          size="lg"
-          type="submit"
-          variant="gold"
-        >
-          Save profile
-        </Button>
-      </form>
-      <div className="border-border border-t pt-6">
-        <p className="text-foreground text-sm font-semibold">Account access</p>
-        <p className="text-muted-foreground mt-1 text-xs leading-5">
-          Sign out of this device when you’re finished.
-        </p>
-        <Button
-          className="mt-4 w-full"
-          disabled={busy}
-          onClick={signOut}
-          type="button"
-          variant="outline"
-        >
-          Sign out
-        </Button>
-      </div>
-    </div>
   );
 }

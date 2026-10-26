@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { AdminShell } from "@/features/admin/admin-shell";
+import { CrmRealtimeRefresh } from "@/features/admin/crm-realtime-refresh";
 import { getAdminAccess } from "@/lib/server/admin-auth";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,7 @@ export default async function AdminWorkspaceLayout({
   if (!access) redirect("/admin/login");
   return (
     <AdminShell email={access.email} role={access.role}>
+      <CrmRealtimeRefresh />
       {children}
     </AdminShell>
   );
