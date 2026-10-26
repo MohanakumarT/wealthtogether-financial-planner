@@ -1,0 +1,105 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-navy: var(--navy);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-editorial);
+  --spacing-content: clamp(1.25rem, 4vw, 3.5rem);
+  --radius-card: 1.25rem;
+  --shadow-card: 0 10px 34px -24px rgb(8 27 58 / 22%);
+}
+
+:root {
+  color-scheme: light;
+  --navy: #081b3a;
+  --gold: #d4af37;
+  --gold-foreground: #081b3a;
+  --background: #f7f8fa;
+  --foreground: #081b3a;
+  --card: #ffffff;
+  --card-foreground: #081b3a;
+  --popover: #ffffff;
+  --popover-foreground: #081b3a;
+  --primary: #081b3a;
+  --primary-foreground: #ffffff;
+  --secondary: #eef1f5;
+  --secondary-foreground: #081b3a;
+  --muted: #f1f3f6;
+  --muted-foreground: #667085;
+  --accent: #f5edcf;
+  --accent-foreground: #081b3a;
+  --destructive: #b42318;
+  --border: #e4e7ec;
+  --input: #d0d5dd;
+  --ring: #d4af37;
+  --font-body: "Aptos", "Segoe UI", Arial, sans-serif;
+  --font-editorial:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #071326;
+  --foreground: #f4f6fa;
+  --card: #0d1d35;
+  --card-foreground: #f4f6fa;
+  --popover: #0d1d35;
+  --popover-foreground: #f4f6fa;
+  --primary: #d4af37;
+  --primary-foreground: #081b3a;
+  --secondary: #142640;
+  --secondary-foreground: #f4f6fa;
+  --muted: #11233d;
+  --muted-foreground: #a9b4c5;
+  --accent: #2a2a24;
+  --accent-foreground: #f5e6ab;
+  --destructive: #f97066;
+  --border: #24344c;
+  --input: #34445c;
+  --ring: #e4c65e;
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  min-height: 100%;
+  background: var(--background);
+}
+body {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+::selection {
+  color: var(--navy);
+  background: rgb(212 175 55 / 35%);
+}
