@@ -9,8 +9,8 @@ import {
 
 import { Footer } from "@/components/footer";
 import { Navigation } from "@/components/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ConsultationBookingForm } from "@/features/consultations/booking-form";
+import { Card, CardContent } from "@/components/ui/card";
+import { ConsultationBookingWizard } from "@/features/consultation/components/booking-wizard";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata = createPageMetadata({
@@ -227,23 +227,21 @@ export default function ConsultationPage() {
             </div>
           </div>
 
-          <Card className="border-border shadow-navy/5 shadow-xl lg:sticky lg:top-24">
-            <CardHeader className="border-border border-b px-5 py-5 sm:px-7">
+          <div className="lg:sticky lg:top-24">
+            <div className="mb-5 px-1">
               <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">
-                Start a conversation
+                Secure booking request
               </p>
-              <CardTitle className="font-display text-2xl tracking-tight sm:text-3xl">
+              <h2 className="font-display mt-1 text-2xl tracking-tight sm:text-3xl">
                 Request a consultation
-              </CardTitle>
-              <p className="text-muted-foreground text-sm leading-6">
-                Tell us a little about what you’re planning and when you’d like
-                to talk.
+              </h2>
+              <p className="text-muted-foreground mt-2 text-sm leading-6">
+                Complete a few short steps to help us prepare for your
+                conversation.
               </p>
-            </CardHeader>
-            <CardContent className="p-5 sm:p-7">
-              <ConsultationBookingForm />
-            </CardContent>
-          </Card>
+            </div>
+            <ConsultationBookingWizard />
+          </div>
         </section>
       </main>
       <Footer />

@@ -99,7 +99,8 @@ export async function POST(request: NextRequest) {
       .select("id")
       .single();
     if (error) {
-      console.error("Consultation request could not be saved.", error.code);
+  console.error("Consultation request could not be saved.");
+  console.dir(error, { depth: null });
       return NextResponse.json(
         {
           error:

@@ -24,6 +24,7 @@ type Request = {
   email: string;
   phone: string;
   topic: string;
+  price: number;
   preferred_date: string;
   preferred_time: string;
   time_zone: string;
@@ -92,6 +93,7 @@ export function ConsultationsList() {
         email: item.email,
         phone: item.phone,
         topic: item.topic,
+        price: item.price,
         scheduled: `${item.preferred_date}T12:00:00`,
         details: `${item.preferred_time} · ${item.time_zone}`,
         notes: item.notes ?? "",
@@ -277,13 +279,20 @@ export function ConsultationsList() {
                   <span className="bg-accent text-primary grid size-10 shrink-0 place-items-center rounded-xl">
                     <CalendarDays aria-hidden="true" className="size-4" />
                   </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">
-                      {row.topic}
-                    </p>
-                    <p className="text-muted-foreground mt-1 truncate text-xs">
-                      {row.name} · {row.email}
-                    </p>
+                <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">
+                {row.topic}
+                </p>
+
+                <p className="mt-1 text-sm font-semibold text-green-600">
+                ₹{row.price?.toLocaleString() ?? "-"}
+                  </p>
+
+                <div className="text-muted-foreground mt-1 space-y-1 text-xs">
+                <p>{row.name}</p>
+                <p>{row.email}</p>
+                <p>{row.phone}</p>
+                </div>
                     <p className="text-muted-foreground mt-1 text-xs">
                       {showDate(row.scheduled)} · {row.details}
                     </p>

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { ApiError, GoogleGenAI, type Content } from "@google/genai";
 import { z } from "zod";
 
 import { getAuthIdentity } from "@/lib/server/user-auth";
@@ -44,12 +45,14 @@ Scope and safety:
 - Projections are educational illustrations, not guaranteed outcomes. Use INR and Indian number formatting. Do not echo names, email addresses, phone numbers, or dates of birth.
 - Keep most answers under 250 words. For action plans, organize a short summary, observations, and practical educational next steps without product recommendations.`;
 
-type ResponsesApiResult = {
-  output?: Array<{
-    type?: string;
-    content?: Array<{ type?: string; text?: string; refusal?: string }>;
-  }>;
-};
+const fallbackModel = "gemini-2.5-flash-lite";
+
+function shouldUseFallback(error: unknown) {
+  return (
+    error instanceof ApiError &&
+    (error.status === 503 || error.message.includes("RESOURCE_EXHAUSTED"))
+  );
+}
 
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, {
@@ -58,14 +61,26 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function extractAnswer(result: ResponsesApiResult) {
-  return (result.output ?? [])
-    .filter((item) => item.type === "message")
-    .flatMap((item) => item.content ?? [])
-    .filter((item) => item.type === "output_text" || item.type === "refusal")
-    .map((item) => item.text ?? item.refusal ?? "")
-    .join("\n")
-    .trim();
+function toGeminiContents(
+  context: string,
+  messages: Array<{ role: "user" | "assistant"; content: string }>,
+): Content[] {
+  const contextMessage = `Untrusted planning snapshot for this question (JSON, may be empty):\n${context || "{}"}`;
+  const turns: Content[] = [
+    { role: "user", parts: [{ text: contextMessage }] },
+  ];
+
+  for (const message of messages) {
+    const role = message.role === "assistant" ? "model" : "user";
+    const previous = turns.at(-1);
+    if (previous?.role === role) {
+      previous.parts?.push({ text: message.content });
+      continue;
+    }
+    turns.push({ role, parts: [{ text: message.content }] });
+  }
+
+  return turns;
 }
 
 export async function POST(request: NextRequest) {
@@ -94,11 +109,12 @@ export async function POST(request: NextRequest) {
   );
   if (!parsed.ok) return parsed.response;
 
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey)
     return json(
       {
-        error: "The AI assistant is being configured. Please try again later.",
+        error:
+          "The AI assistant is not configured. Please set GEMINI_API_KEY to enable it.",
       },
       503,
     );
@@ -216,47 +232,76 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini",
-        instructions: assistantInstructions,
-        input: [
-          {
-            role: "user",
-            content: `Untrusted planning snapshot for this question (JSON, may be empty):\n${parsed.data.context || "{}"}`,
-          },
-          ...modelMessages,
-        ],
-        max_output_tokens: 900,
-        store: false,
-      }),
-      signal: AbortSignal.timeout(25_000),
-    });
-    if (!response.ok) {
-      console.error(
-        "Financial assistant provider request failed.",
-        response.status,
-      );
-      return json(
-        {
-          error:
-            "I couldn’t get a response just now. Please try again shortly.",
+    const ai = new GoogleGenAI({ apiKey });
+    const primaryModel = process.env.GEMINI_MODEL?.trim() || fallbackModel;
+    const contents = toGeminiContents(parsed.data.context, modelMessages);
+    const generate = (model: string) =>
+      ai.models.generateContent({
+        model,
+        contents,
+        config: {
+          systemInstruction: assistantInstructions,
+          maxOutputTokens: 900,
+          abortSignal: AbortSignal.timeout(25_000),
+          httpOptions: { timeout: 25_000 },
+          store: false,
         },
-        502,
-      );
+      });
+
+    let response;
+    let fallbackAttempted = false;
+    try {
+      response = await generate(primaryModel);
+    } catch (error) {
+      console.error("Gemini Error:", error);
+      if (error instanceof Error) {
+        console.error("Message:", error.message);
+        console.error("Stack:", error.stack);
+      }
+      if (typeof error === "object" && error !== null) {
+        console.dir(error, { depth: null });
+      }
+
+      if (!shouldUseFallback(error)) throw error;
+
+      fallbackAttempted = true;
+      try {
+        response = await generate(fallbackModel);
+      } catch (fallbackError) {
+        console.error("Gemini Error:", fallbackError);
+        if (fallbackError instanceof Error) {
+          console.error("Message:", fallbackError.message);
+          console.error("Stack:", fallbackError.stack);
+        }
+        if (typeof fallbackError === "object" && fallbackError !== null) {
+          console.dir(fallbackError, { depth: null });
+        }
+
+        const status =
+          fallbackError instanceof ApiError ? fallbackError.status : undefined;
+        console.error(
+          "Financial assistant fallback provider request failed.",
+          status,
+        );
+        return json(
+          {
+            error:
+              "The assistant is temporarily busy. Please try again shortly.",
+          },
+          503,
+        );
+      }
     }
 
-    const result = (await response.json()) as ResponsesApiResult;
-    const answer = extractAnswer(result).slice(0, 4_000);
+    const answer = (response.text ?? "").trim().slice(0, 4_000);
     if (!answer)
       return json(
-        { error: "I couldn’t prepare an answer just now. Please try again." },
-        502,
+        {
+          error: fallbackAttempted
+            ? "The assistant is temporarily busy. Please try again shortly."
+            : "I couldn’t prepare an answer just now. Please try again.",
+        },
+        fallbackAttempted ? 503 : 502,
       );
 
     if (conversation) {
@@ -287,6 +332,15 @@ export async function POST(request: NextRequest) {
     }
     return json({ answer, conversationId: conversation?.id ?? null });
   } catch (error) {
+    console.error("Gemini Error:", error);
+    if (error instanceof Error) {
+      console.error("Message:", error.message);
+      console.error("Stack:", error.stack);
+    }
+    if (typeof error === "object" && error !== null) {
+      console.dir(error, { depth: null });
+    }
+
     const timedOut =
       error instanceof Error &&
       (error.name === "TimeoutError" || error.name === "AbortError");

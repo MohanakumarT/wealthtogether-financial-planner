@@ -4,6 +4,7 @@ import { absoluteSiteUrl } from "@/lib/site-url";
 
 const publicPaths = [
   "/",
+  "/services",
   "/consultation",
   "/contact",
   "/calculators/sip",

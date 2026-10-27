@@ -31,13 +31,13 @@ export async function GET() {
     return json({ error: "The admin data service is unavailable." }, 503);
   try {
     const [requests, consultations] = await Promise.all([
-      supabase
-        .from("consultation_requests")
-        .select(
-          "id,client_id,name,email,phone,topic,preferred_date,preferred_time,time_zone,notes,status,created_at",
-        )
-        .order("created_at", { ascending: false })
-        .limit(500),
+  supabase
+    .from("bookings")
+    .select(
+      "booking_id,booking_reference,client_id,name,email,phone,service,price,preferred_date,preferred_time,time_zone,notes,booking_status,created_at",
+    )
+    .order("created_at", { ascending: false })
+    .limit(500),
       supabase
         .from("crm_consultations")
         .select(
@@ -49,10 +49,29 @@ export async function GET() {
     if (requests.error || consultations.error)
       throw requests.error ?? consultations.error;
     return json({
-      requests: requests.data ?? [],
+      requests:
+      (requests.data ?? []).map((item: any) => ({
+      id: item.booking_id,
+      booking_reference: item.booking_reference,
+      client_id:  item.client_id,
+      name: item.name,
+      email: item.email,
+      phone: item.phone,
+      topic: item.service,
+      preferred_date: item.preferred_date,
+      preferred_time: item.preferred_time,
+      time_zone: item.time_zone,
+      notes: item.notes,
+      price: item.price,
+      status: item.booking_status.toLowerCase(),
+      created_at: item.created_at,
+      })),
       consultations: consultations.data ?? [],
     });
-  } catch {
+  } catch (error) {
+    console.error("Admin consultations GET failed:");
+    console.dir(error, { depth: null });
+
     return json({ error: "Consultation records could not be loaded." }, 503);
   }
 }
@@ -151,12 +170,21 @@ export async function PATCH(request: NextRequest) {
   try {
     const table =
       parsed.data.source === "request"
-        ? "consultation_requests"
+        ? "bookings"
         : "crm_consultations";
     const { error } = await supabase
       .from(table)
-      .update({ status: parsed.data.status })
-      .eq("id", parsed.data.id);
+      .update(
+        parsed.data.source === "request"
+          ? { booking_status: parsed.data.status }
+          : { status: parsed.data.status }
+      )
+      .eq(
+        parsed.data.source === "request"
+          ? "booking_id"
+          : "id",
+        parsed.data.id,
+      );
     if (error) throw error;
     await publishCrmChanged();
     return json({ saved: true });

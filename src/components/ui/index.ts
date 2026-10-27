@@ -1,4 +1,5 @@
 export { Button, buttonVariants } from "@/components/ui/button";
+export { Accordion, type AccordionItem } from "@/components/ui/accordion";
 export {
   Card,
   CardContent,

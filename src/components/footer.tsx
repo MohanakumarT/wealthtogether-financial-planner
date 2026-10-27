@@ -3,6 +3,7 @@ import { Landmark } from "lucide-react";
 
 const footerLinks = [
   { label: "Features", href: "/#features" },
+  { label: "Services", href: "/services" },
   { label: "Planning categories", href: "/#calculators" },
   { label: "Frequently asked questions", href: "/#faq" },
   { label: "Portfolio tracker", href: "/portfolio" },
