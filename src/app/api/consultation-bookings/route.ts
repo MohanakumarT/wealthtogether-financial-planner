@@ -138,12 +138,45 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { data: existingClient } = await supabase
-      .from("crm_clients")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
+    // Look for an existing client by email
+// Check if the client already exists
+const { data: existingClient, error: existingClientError } = await supabase
+  .from("crm_clients")
+  .select("id")
+  .eq("email", email)
+  .maybeSingle();
 
+if (existingClientError) {
+  throw existingClientError;
+}
+
+let clientId = existingClient?.id;
+
+// Create client if not found
+if (!clientId) {
+  const { data: newClient, error: newClientError } = await supabase
+    .from("crm_clients")
+    .insert({
+      name: values.name,
+      email,
+      phone: values.phone,
+      city: values.city,
+      occupation: values.occupation,
+      goals: values.financialGoals.join(", "),
+      notes: values.notes || null,
+      income: Number(values.monthlyIncome),
+      risk_profile: values.riskProfile,
+      status: "Lead",
+    })
+    .select("id")
+    .single();
+
+  if (newClientError) {
+    throw newClientError;
+  }
+
+  clientId = newClient.id;
+}
     const { data, error } = await supabase
       .from("bookings")
       .insert({
@@ -168,7 +201,7 @@ export async function POST(request: NextRequest) {
         time_zone: values.timeZone,
         meeting_mode: values.meetingMode,
         notes: values.notes || null,
-        client_id: existingClient?.id ?? null,
+        client_id: clientId,
         consented_at: new Date().toISOString(),
       })
       .select("booking_id,booking_reference")
