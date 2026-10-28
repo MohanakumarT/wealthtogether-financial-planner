@@ -172,19 +172,42 @@ export async function PATCH(request: NextRequest) {
       parsed.data.source === "request"
         ? "bookings"
         : "crm_consultations";
-    const { error } = await supabase
-      .from(table)
-      .update(
-        parsed.data.source === "request"
-          ? { booking_status: parsed.data.status }
-          : { status: parsed.data.status }
-      )
-      .eq(
-        parsed.data.source === "request"
-          ? "booking_id"
-          : "id",
-        parsed.data.id,
-      );
+    // Update the status
+const { error } = await supabase
+  .from(table)
+  .update(
+    parsed.data.source === "request"
+      ? { booking_status: parsed.data.status }
+      : { status: parsed.data.status }
+  )
+  .eq(
+    parsed.data.source === "request"
+      ? "booking_id"
+      : "id",
+    parsed.data.id,
+  );
+
+if (error) throw error;
+
+// STEP 2: Only create/link client if booking isn't already linked
+if (
+  parsed.data.source === "request" &&
+  parsed.data.status === "confirmed"
+) {
+  const { data: booking, error: bookingError } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("booking_id", parsed.data.id)
+    .single();
+
+  if (bookingError) throw bookingError;
+
+  if (!booking.client_id) {
+    console.log("Booking has no linked client. Will create CRM client...");
+  } else {
+    console.log("Booking already linked to client:", booking.client_id);
+  }
+}
     if (error) throw error;
     await publishCrmChanged();
     return json({ saved: true });
