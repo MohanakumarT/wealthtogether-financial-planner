@@ -1,7 +1,7 @@
 # WealthTogether Financial Planner QA Report
 
 **Date:** 2026-10-26  
-**Environment:** Local Next.js development server and production build. No local Supabase or OpenAI credentials were configured.
+**Environment:** Local Next.js development server and production build. No local Supabase or Gemini credentials were configured.
 
 ## Tests passed
 
@@ -27,7 +27,7 @@
 
 - **Supabase-backed integration is unverified.** No `.env.local`, Supabase URL, publishable/anon key, or service-role key was available. Signup, login, email verification, password reset, authenticated role checks, profile persistence, CRM CRUD, realtime, and saved assistant history could not be exercised against a real project.
 - **Database migrations were not applied to a live database.** The migration files were reviewed, but this environment has no Supabase project connection or local Supabase/PostgreSQL CLI available. Apply migrations in documented order through `20261026007000_financial_assistant.sql` before deployment.
-- **OpenAI responses were not exercised.** `OPENAI_API_KEY` was not configured; the authenticated assistant response path therefore remains an environment-level integration check.
+- **Gemini responses were not exercised.** `GEMINI_API_KEY` was not configured; the authenticated assistant provider request remains an environment-level integration check.
 - The build used a temporary HTTPS origin for validation. Set `NEXT_PUBLIC_SITE_URL` to the real production origin in Vercel before deployment.
 
 No TypeScript, ESLint, formatting, browser runtime/hydration, or production build errors remain in the locally testable paths.

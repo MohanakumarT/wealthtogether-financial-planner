@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
-import { ArrowLeft, ArrowRight, CalendarDays, Clock3, LoaderCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock3, LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

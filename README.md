@@ -88,14 +88,18 @@ Markdown responses, planning summaries, scenario illustrations, and a printable
 report. It can explain calculator snapshots and, only after the user opts in,
 send a minimized planning snapshot (age, cash flow, goal types, amounts and
 dates without goal labels, portfolio totals, and emergency-fund estimate) to the
-OpenAI Responses API.
+Google Gemini API using the official `@google/genai` SDK and
+`gemini-2.5-flash-lite` by default. If the configured model returns a 503
+`UNAVAILABLE` or `RESOURCE_EXHAUSTED` error, the route retries once with
+`gemini-2.5-flash-lite`; if that retry fails, it returns a friendly temporary
+availability message.
 Account names, email addresses, phone numbers, and dates of birth are excluded
 from that snapshot. Users should avoid including identifiers in chat messages.
 The snapshot is sent only for a response and is not stored with chat messages.
 Conversation text is stored in private `assistant_conversations` and
-`assistant_messages` tables. Set the server-only `OPENAI_API_KEY` (optionally
-`OPENAI_MODEL`) and apply the rate-limit migration and
-`supabase/migrations/20261026007000_financial_assistant.sql`. Responses are
+`assistant_messages` tables. Set the server-only `GEMINI_API_KEY` (optionally
+`GEMINI_MODEL`, which defaults to `gemini-2.5-flash-lite`) and apply the rate-limit
+migration and `supabase/migrations/20261026007000_financial_assistant.sql`. Responses are
 educational and do not recommend securities or mutual funds. Calculator chat
 requires an authenticated client account.
 

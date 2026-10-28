@@ -79,8 +79,11 @@ export const consultationBookingSchema = z.object({
         date.toISOString().slice(0, 10) === value
       );
     }, "Choose a valid date."),
-  preferredTime: z.enum(appointmentTimeSlots, {
-    error: "Choose an available appointment time.",
+  preferredTime: z
+  .enum(appointmentTimeSlots)
+  .optional()
+  .refine((value) => value !== undefined, {
+    message: "Choose an available appointment time.",
   }),
   timeZone: z
     .string()

@@ -107,6 +107,7 @@ export function ConsultationsList() {
         email: item.client?.email ?? "",
         phone: "",
         topic: item.topic,
+         price: null,
         scheduled: item.scheduled_at,
         details: "Team recorded",
         notes: item.notes,

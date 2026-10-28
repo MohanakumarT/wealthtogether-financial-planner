@@ -466,7 +466,7 @@ export function ConsultationBookingWizard() {
         date={details.preferredDate}
         onBookAnother={bookAnother}
         reference={bookingReference}
-        time={details.preferredTime}
+        time={details.preferredTime ?? ""}
         timeZone={details.timeZone}
       />
     );

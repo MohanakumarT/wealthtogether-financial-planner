@@ -50,7 +50,7 @@ export async function GET() {
       throw requests.error ?? consultations.error;
     return json({
       requests:
-      (requests.data ?? []).map((item: any) => ({
+      (requests.data ?? []).map((item) => ({
       id: item.booking_id,
       booking_reference: item.booking_reference,
       client_id:  item.client_id,

@@ -70,8 +70,8 @@ deployment.
 | `NEXT_PUBLIC_SUPABASE_URL`             | Auth, saved plans, and public forms                          | Supabase project URL.                                                                                                                                      |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Auth, saved plans, and public forms                          | Browser-safe Supabase publishable key. The legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` is supported if needed.                                                  |
 | `SUPABASE_SERVICE_ROLE_KEY`            | Contact, consultation, persistent rate limits, and admin CRM | Server-only secret. It powers protected CRM APIs after the signed-in user passes the admin role check. Never prefix it with `NEXT_PUBLIC_`.                |
-| `OPENAI_API_KEY`                       | AI financial assistant                                       | Server-only OpenAI API key used by `/api/financial-assistant`. Never prefix it with `NEXT_PUBLIC_`.                                                        |
-| `OPENAI_MODEL`                         | AI financial assistant                                       | Optional Responses API model override. Defaults to `gpt-4.1-mini`.                                                                                         |
+| `GEMINI_API_KEY`                       | AI financial assistant                                       | Server-only Google Gemini API key used by `/api/financial-assistant`. Never prefix it with `NEXT_PUBLIC_`.                                                 |
+| `GEMINI_MODEL`                         | AI financial assistant                                       | Optional Gemini model override. Defaults to `gemini-3.8-flash`.                                                                                            |
 | `NEXT_PUBLIC_CONTACT_EMAIL`            | Contact links                                                | Public contact address.                                                                                                                                    |
 | `NEXT_PUBLIC_CONTACT_WHATSAPP`         | Contact and consultation links                               | Public phone number in international format.                                                                                                               |
 | `NEXT_PUBLIC_CONSULTATION_EMAIL`       | Consultation profile                                         | Public advisory email; the contact email is used as a fallback.                                                                                            |
@@ -87,11 +87,11 @@ Set public variables in **Production, Preview, and Development** as needed.
 The production build fails if `NEXT_PUBLIC_SITE_URL` is missing, not HTTPS, or
 still points at localhost or the `.example` placeholder. Keep the actual
 service-role key and Resend API key in Vercel’s encrypted server environment.
-The AI assistant also needs `OPENAI_API_KEY`, the Supabase rate-limit RPC, and
+The AI assistant also needs `GEMINI_API_KEY`, the Supabase rate-limit RPC, and
 migration `20261026007000_financial_assistant.sql`. It limits requests to 8
 per minute and 40 per day per client IP and user. Authenticated client accounts
 can use `/assistant`; each request sends the question and, only after explicit
-opt-in, a minimized planning snapshot to the OpenAI Responses API with response
+opt-in, a minimized planning snapshot to the Google Gemini API with response
 storage disabled. Conversation text is stored in private, per-user Supabase
 tables; the planning snapshot is not stored with chat history. The chat labels
 personal context sharing and offers a consultation link. Remind users not to
@@ -167,7 +167,7 @@ Production metadata, canonical links, sitemap, and social cards use
 - **Email notifications do not arrive:** verify the Resend sender domain and
   the API key, sender, and recipient variables. Form data is saved independently
   of optional notification delivery.
-- **AI assistant returns 503:** confirm `OPENAI_API_KEY`, the Supabase service
+- **AI assistant returns 503:** confirm `GEMINI_API_KEY`, the Supabase service
   role key, and the rate-limit migration are configured for that environment.
 - **Preview pages are not indexed:** that is intentional. Vercel Preview
   deployments are noindex and their robots route blocks crawlers.
