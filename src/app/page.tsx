@@ -4,6 +4,7 @@ import { FAQ } from "@/components/marketing/faq";
 import { Features } from "@/components/marketing/features";
 import { Hero } from "@/components/marketing/hero";
 import { Testimonials } from "@/components/marketing/testimonials";
+import { TrustStats } from "@/components/marketing/trust-stats";
 import { WhyWealthTogether } from "@/components/marketing/why-wealthtogether";
 import { Footer } from "@/components/footer";
 import { Navigation } from "@/components/navigation";
@@ -20,15 +21,25 @@ export default function HomePage() {
   return (
     <>
       <Navigation />
+
       <main>
         <Hero />
+
+        <TrustStats />
+
         <Features />
+
         <CalculatorCategories />
+
         <WhyWealthTogether />
+
         <Testimonials />
+
         <FAQ />
+
         <CallToAction />
       </main>
+
       <Footer />
     </>
   );

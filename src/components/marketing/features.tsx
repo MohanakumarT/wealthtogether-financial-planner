@@ -1,8 +1,8 @@
 import {
   ArrowUpRight,
-  Compass,
-  MessagesSquare,
-  SlidersHorizontal,
+  BookOpen,
+  Calculator,
+  GraduationCap,
 } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
@@ -10,22 +10,22 @@ import { Eyebrow, SectionHeading } from "@/components/ui/typography";
 
 const features = [
   {
-    icon: MessagesSquare,
-    title: "Make space for both voices",
+    icon: BookOpen,
+    title: "Financial Education",
     description:
-      "Bring separate perspectives into one shared conversation, so the plan can reflect the people behind it.",
+      "Understand mutual funds, SIPs, insurance and personal finance through simple learning resources written for beginners.",
   },
   {
-    icon: Compass,
-    title: "See a clearer path forward",
+    icon: Calculator,
+    title: "Premium Calculators",
     description:
-      "Turn big ambitions into smaller decisions you can understand, discuss, and revisit together.",
+      "Plan retirement, children's education, SIPs and financial goals using interactive calculators and planning tools.",
   },
   {
-    icon: SlidersHorizontal,
-    title: "Shape a plan that can flex",
+    icon: GraduationCap,
+    title: "Educational Consultation",
     description:
-      "Life changes. Keep your priorities visible and adjust your direction as the next chapter takes shape.",
+      "Book a one-to-one educational session to understand investment concepts and available options before making financial decisions.",
   },
 ];
 
@@ -35,38 +35,47 @@ export function Features() {
       className="px-content mx-auto max-w-7xl py-20 sm:py-24"
       id="features"
     >
-      <div className="max-w-2xl">
-        <Eyebrow>PLANNING, MADE PERSONAL</Eyebrow>
+      <div className="max-w-3xl">
+        <Eyebrow>FINANCIAL EDUCATION MADE SIMPLE</Eyebrow>
+
         <SectionHeading className="mt-3 text-3xl sm:text-4xl">
-          A shared plan should feel like yours.
+          Understand Money.
+          <br />
+          Build Wealth.
+          <br />
+          Make Better Decisions.
         </SectionHeading>
-        <p className="text-muted-foreground mt-4 text-base leading-7">
-          Less financial noise. More room for the conversations that help you
-          move forward.
+
+        <p className="text-muted-foreground mt-5 text-base leading-7">
+          Learn investing through simple explanations, interactive calculators
+          and educational consultations. We help you understand financial
+          concepts so you can make informed decisions with confidence.
         </p>
       </div>
-      <div className="mt-10 grid gap-4 md:grid-cols-3">
+
+      <div className="mt-12 grid gap-5 md:grid-cols-3">
         {features.map(({ icon: Icon, title, description }, index) => (
           <Card
-            className="group relative overflow-hidden p-6 transition-transform duration-300 hover:-translate-y-1 sm:p-7"
             key={title}
+            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-all duration-300 hover:-translate-y-2 hover:border-[#D4AF37]/40 hover:bg-white/[0.05]"
           >
-            <span className="bg-accent text-accent-foreground grid size-11 place-items-center rounded-xl">
-              <Icon aria-hidden="true" className="size-5" />
+            <span className="bg-gold/15 text-gold grid size-14 place-items-center rounded-2xl">
+              <Icon className="size-6" />
             </span>
-            <p className="text-muted-foreground mt-7 text-xs font-semibold tracking-widest">
+
+            <p className="text-gold mt-8 text-xs font-semibold tracking-[0.2em]">
               0{index + 1}
             </p>
-            <h3 className="font-display mt-2 text-2xl tracking-tight">
+
+            <h3 className="font-display mt-3 text-2xl tracking-tight">
               {title}
             </h3>
-            <p className="text-muted-foreground mt-3 text-sm leading-6">
+
+            <p className="text-muted-foreground mt-4 leading-7">
               {description}
             </p>
-            <ArrowUpRight
-              aria-hidden="true"
-              className="text-muted-foreground group-hover:text-primary absolute top-6 right-6 size-4 transition-colors"
-            />
+
+            <ArrowUpRight className="absolute top-8 right-8 size-5 opacity-50 transition-all group-hover:text-[#D4AF37] group-hover:opacity-100" />
           </Card>
         ))}
       </div>
