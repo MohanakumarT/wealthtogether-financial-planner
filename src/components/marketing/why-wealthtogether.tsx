@@ -45,10 +45,10 @@ export function WhyWealthTogether() {
           </SectionHeading>
 
           <p className="mt-5 max-w-md text-base leading-7 text-white/65">
-            Whether you're starting your first SIP, planning your dream home,
-            preparing for retirement, or working toward financial freedom,
-            WealthTogether gives you the knowledge and planning tools to make
-            every financial decision with confidence.
+            Whether you&apos;re starting your first SIP, planning your dream home,
+preparing for retirement, or working toward financial freedom,
+WealthTogether gives you the knowledge and planning tools to make
+every financial decision with confidence.
           </p>
         </div>
 
