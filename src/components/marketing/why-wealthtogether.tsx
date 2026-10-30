@@ -1,25 +1,25 @@
-import { Handshake, LockKeyhole, ScanEye } from "lucide-react";
+import { BookOpen, ChartSpline, Target } from "lucide-react";
 
 import { Eyebrow, SectionHeading } from "@/components/ui/typography";
 
 const reasons = [
   {
-    icon: Handshake,
-    title: "Together by design",
+    icon: BookOpen,
+    title: "Learn Simply",
     description:
-      "Money conversations work better when there is space for both people and the future they are building.",
+      "Financial concepts explained in plain language, so you understand every decision before you invest.",
   },
   {
-    icon: ScanEye,
-    title: "Clarity before complexity",
+    icon: ChartSpline,
+    title: "Plan Smarter",
     description:
-      "Start with plain language and a view of the whole picture. Go deeper only when it helps.",
+      "Interactive planners help you build goals for wealth, retirement, education, home, and financial freedom with confidence.",
   },
   {
-    icon: LockKeyhole,
-    title: "Your choices stay yours",
+    icon: Target,
+    title: "Build Wealth Together",
     description:
-      "Planning is personal. You set the priorities, make the decisions, and choose what comes next.",
+      "Track your progress, stay consistent, and move closer to your financial goals with practical tools designed for every stage of life.",
   },
 ];
 
@@ -36,15 +36,22 @@ export function WhyWealthTogether() {
       />
       <div className="px-content relative mx-auto grid max-w-7xl gap-12 py-20 sm:py-24 lg:grid-cols-[.9fr_1.1fr] lg:gap-20">
         <div>
-          <Eyebrow className="text-gold">WHY WEALTHTOGETHER</Eyebrow>
+          <Eyebrow className="text-gold">
+            THE WEALTHTOGETHER DIFFERENCE
+          </Eyebrow>
+
           <SectionHeading className="mt-3 max-w-lg text-3xl sm:text-4xl">
-            The best plan is one you can see yourselves in.
+            Everything you need to build your financial future.
           </SectionHeading>
+
           <p className="mt-5 max-w-md text-base leading-7 text-white/65">
-            We bring the numbers into the conversation, without letting them
-            take over it.
+            Whether you're starting your first SIP, planning your dream home,
+            preparing for retirement, or working toward financial freedom,
+            WealthTogether gives you the knowledge and planning tools to make
+            every financial decision with confidence.
           </p>
         </div>
+
         <div className="divide-y divide-white/15">
           {reasons.map(({ icon: Icon, title, description }, index) => (
             <article
@@ -54,11 +61,16 @@ export function WhyWealthTogether() {
               <span className="border-gold/30 bg-gold/10 text-gold grid size-11 shrink-0 place-items-center rounded-xl border">
                 <Icon aria-hidden="true" className="size-5" />
               </span>
+
               <div>
                 <p className="text-gold/80 text-xs font-medium tracking-widest">
                   0{index + 1}
                 </p>
-                <h3 className="font-display mt-1 text-xl">{title}</h3>
+
+                <h3 className="font-display mt-1 text-xl">
+                  {title}
+                </h3>
+
                 <p className="mt-2 max-w-lg text-sm leading-6 text-white/60">
                   {description}
                 </p>
