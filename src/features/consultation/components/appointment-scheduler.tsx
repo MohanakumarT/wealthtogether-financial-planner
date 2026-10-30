@@ -76,7 +76,10 @@ export function AppointmentScheduler() {
         );
         setAvailableSlots(slots);
         if (selectedTime && !slots.includes(selectedTime)) {
-          setValue("preferredTime", undefined, { shouldValidate: true });
+          setValue("preferredTime", undefined, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
         }
       })
       .catch((error: unknown) => {

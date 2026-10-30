@@ -177,6 +177,11 @@ if (!clientId) {
 
   clientId = newClient.id;
 }
+    console.log("========== DEBUG ==========");
+    console.log("Existing Client:", existingClient);
+    console.log("Client ID:", clientId);
+    console.log("Booking Email:", email);
+    console.log("===========================");
     const { data, error } = await supabase
       .from("bookings")
       .insert({
