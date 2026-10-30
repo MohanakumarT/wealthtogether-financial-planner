@@ -17,19 +17,27 @@ export function useCalculator<TValues extends FieldValues>(
     null,
   );
   const [calculationError, setCalculationError] = useState<string | null>(null);
+
   const form = useForm<TValues>({
     resolver: zodResolver(definition.schema) as Resolver<TValues>,
     defaultValues: definition.defaultValues,
-    mode: "onChange",
+
+    // Validate only when the user submits the calculator.
+    mode: "onSubmit",
+
+    // After submission, update validation while typing.
     reValidateMode: "onChange",
   });
 
   const calculate = form.handleSubmit((values) => {
     try {
       const nextResult = definition.calculate(values);
+
       setResult(nextResult);
       setCalculatedValues(values);
       setCalculationError(null);
+
+      // Keep entered values after calculation.
       form.reset(values);
     } catch {
       setResult(null);
@@ -50,13 +58,19 @@ export function useCalculator<TValues extends FieldValues>(
   const restore = useCallback(
     (inputValues: unknown) => {
       const parsed = definition.schema.safeParse(inputValues);
-      if (!parsed.success) return false;
+
+      if (!parsed.success) {
+        return false;
+      }
+
       try {
         const nextResult = definition.calculate(parsed.data);
+
         form.reset(parsed.data);
         setResult(nextResult);
         setCalculatedValues(parsed.data);
         setCalculationError(null);
+
         return true;
       } catch {
         return false;

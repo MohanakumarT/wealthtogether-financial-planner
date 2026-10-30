@@ -4,6 +4,7 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
+
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -29,48 +30,73 @@ export function InputField({
 }: InputFieldProps) {
   const generatedId = useId();
   const inputId = id ?? props.name ?? generatedId;
+
   const describedBy =
     [hint && !error && `${inputId}-hint`, error && `${inputId}-error`]
       .filter(Boolean)
       .join(" ") || undefined;
+
   return (
     <div className="space-y-2">
       <label
-        className="text-foreground block text-sm font-medium"
         htmlFor={inputId}
+        className="block text-sm font-semibold text-slate-700 dark:text-slate-200"
       >
         {label}
       </label>
+
       <div className="relative">
         {leading ? (
-          <span className="text-muted-foreground absolute inset-y-0 left-3.5 flex items-center">
+          <span className="absolute inset-y-0 left-4 flex items-center text-slate-500">
             {leading}
           </span>
         ) : null}
+
         <Input
-          aria-describedby={describedBy}
-          aria-invalid={Boolean(error)}
-          className={cn(leading && "pl-10", trailing && "pr-20", className)}
           id={inputId}
           inputRef={inputRef}
+          aria-describedby={describedBy}
+          aria-invalid={Boolean(error)}
+          className={cn(
+            "h-14 rounded-2xl border-2 border-slate-200 bg-white text-lg font-semibold shadow-sm transition-all duration-200",
+            "placeholder:text-slate-400",
+            "focus:border-[#D4AF37] focus:ring-4 focus:ring-[#D4AF37]/20",
+            "dark:border-slate-700 dark:bg-slate-900 dark:text-white",
+            leading && "pl-12",
+            trailing && "pr-20",
+            className,
+          )}
+          onFocus={(e) => {
+            // Automatically select the whole value
+            e.target.select();
+
+            // Preserve any existing onFocus handler
+            props.onFocus?.(e);
+          }}
           {...props}
         />
+
         {trailing ? (
-          <span className="text-muted-foreground absolute inset-y-0 right-3.5 flex items-center">
+          <span className="absolute inset-y-0 right-4 flex items-center text-slate-500">
             {trailing}
           </span>
         ) : null}
       </div>
+
       {hint && !error ? (
-        <p className="text-muted-foreground text-xs" id={`${inputId}-hint`}>
+        <p
+          id={`${inputId}-hint`}
+          className="text-xs text-slate-500 dark:text-slate-400"
+        >
           {hint}
         </p>
       ) : null}
+
       {error ? (
         <p
-          className="text-destructive text-xs"
           id={`${inputId}-error`}
           role="alert"
+          className="text-xs font-medium text-red-600"
         >
           {error}
         </p>

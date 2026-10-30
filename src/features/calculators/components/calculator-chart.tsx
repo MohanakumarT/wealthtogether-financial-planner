@@ -195,81 +195,107 @@ export function CalculatorChart({ chart }: { chart: CalculatorChartConfig }) {
     }
   };
 
-  const axes = (
-    <>
-      <CartesianGrid
-        stroke="var(--border)"
-        strokeDasharray="4 4"
-        vertical={false}
-      />
-      <XAxis
-        angle={compactBarLabels ? -42 : chart.kind === "bar" ? -16 : 0}
-        axisLine={false}
-        dataKey={chart.xKey}
-        height={compactBarLabels ? 78 : chart.kind === "bar" ? 54 : 30}
-        interval={chart.kind === "bar" ? 0 : "preserveEnd"}
-        minTickGap={chart.kind === "bar" ? 10 : 18}
-        textAnchor={chart.kind === "bar" ? "end" : "middle"}
-        tick={{
-          fill: "var(--muted-foreground)",
-          fontSize: compactBarLabels ? 9 : chart.kind === "bar" ? 10 : 11,
+ const axes = (
+  <>
+    <CartesianGrid
+      stroke="#E8ECF2"
+      strokeDasharray="3 6"
+      vertical={false}
+    />
+
+    <XAxis
+      angle={compactBarLabels ? -42 : chart.kind === "bar" ? -16 : 0}
+      axisLine={false}
+      dataKey={chart.xKey}
+      height={compactBarLabels ? 78 : chart.kind === "bar" ? 54 : 30}
+      interval={chart.kind === "bar" ? 0 : "preserveEnd"}
+      minTickGap={chart.kind === "bar" ? 10 : 18}
+      textAnchor={chart.kind === "bar" ? "end" : "middle"}
+      tick={{
+        fill: "#64748B",
+        fontSize: 11,
+        fontWeight: 600,
+      }}
+      
+      tickFormatter={(value) => {
+        const label = String(value);
+        const maximumLength = compactBarLabels ? 10 : 16;
+
+        return chart.kind === "bar" && label.length > maximumLength
+          ? `${label.slice(0, maximumLength - 1)}…`
+          : label;
+      }}
+      tickLine={false}
+      tickMargin={10}
+    />
+
+    <YAxis
+      axisLine={false}
+      tick={{
+        fill: "#64748B",
+        fontSize: 11,
+        fontWeight: 600,
+      }}
+      tickFormatter={(value) =>
+        formatCompactCalculatorValue(
+          Number(value),
+          chart.valueFormat,
+          chart.currency,
+        )
+      }
+      tickLine={false}
+      width={68}
+    />
+
+    <Tooltip
+      cursor={{
+        stroke: "#D4AF37",
+        strokeWidth: 2,
+        strokeDasharray: "5 5",
+      }}
+      formatter={(value, name) => [
+        formatCalculatorValue(
+          Number(value ?? 0),
+          chart.valueFormat,
+          chart.currency,
+        ),
+        String(name),
+      ]}
+      contentStyle={{
+        background: "#081B3A",
+        color: "#FFFFFF",
+        border: "1px solid #D4AF37",
+        borderRadius: 16,
+        boxShadow: "0 18px 40px rgba(8,27,58,.35)",
+        padding: "12px 16px",
+      }}
+      itemStyle={{
+        color: "#FFFFFF",
+        fontWeight: 600,
+      }}
+      labelStyle={{
+        color: "#D4AF37",
+        fontWeight: 700,
+        fontSize: 12,
+        marginBottom: 6,
+      }}
+    />
+
+    {chart.series.length > 1 ? (
+      <Legend
+        align="center"
+        verticalAlign="top"
+        iconType="circle"
+        iconSize={10}
+        wrapperStyle={{
+          fontSize: 13,
+          fontWeight: 600,
+          paddingBottom: 20,
         }}
-        tickFormatter={(value) => {
-          const label = String(value);
-          const maximumLength = compactBarLabels ? 10 : 16;
-          return chart.kind === "bar" && label.length > maximumLength
-            ? `${label.slice(0, maximumLength - 1)}…`
-            : label;
-        }}
-        tickLine={false}
-        tickMargin={10}
       />
-      <YAxis
-        axisLine={false}
-        tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
-        tickFormatter={(value) =>
-          formatCompactCalculatorValue(
-            Number(value),
-            chart.valueFormat,
-            chart.currency,
-          )
-        }
-        tickLine={false}
-        width={68}
-      />
-      <Tooltip
-        formatter={(value, name) => [
-          formatCalculatorValue(
-            Number(value ?? 0),
-            chart.valueFormat,
-            chart.currency,
-          ),
-          String(name),
-        ]}
-        contentStyle={{
-          background: "var(--popover)",
-          border: "1px solid var(--border)",
-          borderRadius: 12,
-          color: "var(--popover-foreground)",
-          boxShadow: "0 12px 32px -20px rgb(8 27 58 / 45%)",
-        }}
-        itemStyle={{ color: "var(--popover-foreground)" }}
-        labelStyle={{
-          color: "var(--muted-foreground)",
-          fontSize: 11,
-          marginBottom: 4,
-        }}
-      />
-      {chart.series.length > 1 ? (
-        <Legend
-          align="center"
-          iconType="circle"
-          iconSize={8}
-          wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
-        />
-      ) : null}
-    </>
-  );
+    ) : null}
+  </>
+);
 
   const action = (
     <div className="space-y-1">
@@ -277,7 +303,7 @@ export function CalculatorChart({ chart }: { chart: CalculatorChartConfig }) {
         aria-label={`Export ${chart.title} as PNG`}
         disabled={isExporting}
         onClick={handleExport}
-        size="sm"
+        size="default"
         type="button"
         variant="outline"
       >
@@ -289,7 +315,7 @@ export function CalculatorChart({ chart }: { chart: CalculatorChartConfig }) {
         ) : (
           <Download aria-hidden="true" className="size-4" />
         )}
-        {isExporting ? "Preparing" : "Export PNG"}
+        {isExporting ? "Generating..." : "Download Chart"}
       </Button>
       {exportMessage ? (
         <p
@@ -337,7 +363,7 @@ export function CalculatorChart({ chart }: { chart: CalculatorChartConfig }) {
                   key={series.key}
                   name={series.label}
                   stroke={series.color ?? palette[index % palette.length]}
-                  strokeWidth={2.75}
+                  strokeWidth={4}
                   type="monotone"
                 />
               ))}
@@ -362,7 +388,7 @@ export function CalculatorChart({ chart }: { chart: CalculatorChartConfig }) {
                   key={series.key}
                   maxBarSize={64}
                   name={series.label}
-                  radius={[6, 6, 0, 0]}
+                  radius={[12, 12, 0, 0]}
                 />
               ))}
             </BarChart>
@@ -375,13 +401,14 @@ export function CalculatorChart({ chart }: { chart: CalculatorChartConfig }) {
               {axes}
               {chart.series.map((series, index) => (
                 <Area
-                  activeDot={{ r: 5, strokeWidth: 2 }}
+                  activeDot={{ r:8,
+                  strokeWidth:3 }}
                   animationBegin={prefersReducedMotion ? 0 : index * 110}
                   animationDuration={1_000}
                   animationEasing="ease-out"
                   dataKey={series.key}
                   fill={series.color ?? palette[index % palette.length]}
-                  fillOpacity={chart.series.length > 1 ? 0.1 : 0.18}
+                  fillOpacity={chart.series.length > 1 ? 0.1 : 0.25}
                   isAnimationActive={!prefersReducedMotion && !isExporting}
                   key={series.key}
                   name={series.label}
