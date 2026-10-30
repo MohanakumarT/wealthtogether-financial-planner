@@ -32,10 +32,16 @@ const categories: CalculatorCategory[] = [
     actions: [
       {
         href: "/calculators/emergency-fund",
-        label: "Emergency fund calculator",
+        label: "WealthTogether Emergency Fund Planner™",
       },
-      { href: "/calculators/inflation", label: "Inflation calculator" },
-      { href: "/calculators/goal-planner", label: "Compare life goals" },
+      {
+        href: "/calculators/inflation",
+        label: "WealthTogether Future Value Planner™",
+      },
+      {
+        href: "/calculators/goal-planner",
+        label: "WealthTogether Life Goal Planner™",
+      },
     ],
   },
   {
@@ -44,7 +50,12 @@ const categories: CalculatorCategory[] = [
     description:
       "Explore the choices that shape the life you want your future selves to enjoy.",
     tags: ["Retirement", "Income planning"],
-    actions: [{ href: "/calculators/retirement", label: "Retirement planner" }],
+    actions: [
+      {
+        href: "/calculators/retirement",
+        label: "WealthTogether Retirement Freedom Planner™",
+      },
+    ],
   },
   {
     icon: BriefcaseBusiness,
@@ -53,15 +64,30 @@ const categories: CalculatorCategory[] = [
       "Understand how time, contributions, and assumptions can shape a long-term plan.",
     tags: ["Investment growth", "Contributions"],
     actions: [
-      { href: "/calculators/sip", label: "SIP calculator" },
-      { href: "/calculators/lumpsum", label: "Lumpsum calculator" },
-      { href: "/calculators/step-up-sip", label: "Step-up SIP calculator" },
+      {
+        href: "/calculators/sip",
+        label: "WealthTogether SIP Planner™",
+      },
+      {
+        href: "/calculators/lumpsum",
+        label: "WealthTogether Lumpsum Planner™",
+      },
+      {
+        href: "/calculators/step-up-sip",
+        label: "WealthTogether Step-up SIP Planner™",
+      },
       {
         href: "/calculators/mutual-fund-goal-planner",
-        label: "Mutual fund goal planner",
+        label: "WealthTogether Goal Investment Planner™",
       },
-      { href: "/calculators/swp", label: "SWP calculator" },
-      { href: "/portfolio", label: "Portfolio tracker" },
+      {
+        href: "/calculators/swp",
+        label: "WealthTogether Retirement Income Planner™",
+      },
+      {
+        href: "/portfolio",
+        label: "WealthTogether Portfolio Tracker™",
+      },
     ],
   },
   {
@@ -71,8 +97,14 @@ const categories: CalculatorCategory[] = [
       "Bring a home, a move, or another meaningful milestone into view.",
     tags: ["Home buying", "Life goals"],
     actions: [
-      { href: "/calculators/house-purchase", label: "House purchase planner" },
-      { href: "/calculators/car-purchase", label: "Car purchase planner" },
+      {
+        href: "/calculators/house-purchase",
+        label: "WealthTogether Dream Home Planner™",
+      },
+      {
+        href: "/calculators/car-purchase",
+        label: "WealthTogether Vehicle Purchase Planner™",
+      },
     ],
   },
   {
@@ -84,9 +116,12 @@ const categories: CalculatorCategory[] = [
     actions: [
       {
         href: "/calculators/child-education",
-        label: "Child education planner",
+        label: "WealthTogether Child Education Planner™",
       },
-      { href: "/calculators/marriage-goal", label: "Marriage goal planner" },
+      {
+        href: "/calculators/marriage-goal",
+        label: "WealthTogether Marriage Goal Planner™",
+      },
     ],
   },
   {
@@ -118,6 +153,7 @@ export function CalculatorCategories() {
             financial advice.
           </p>
         </div>
+
         <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {categories.map(
             ({ icon: Icon, title, description, tags, actions }) => (
@@ -129,17 +165,21 @@ export function CalculatorCategories() {
                   <span className="bg-card text-primary grid size-11 place-items-center rounded-xl shadow-sm">
                     <Icon aria-hidden="true" className="size-5" />
                   </span>
+
                   <ArrowUpRight
                     aria-hidden="true"
                     className="text-muted-foreground size-4"
                   />
                 </div>
+
                 <h3 className="font-display mt-5 text-xl tracking-tight">
                   {title}
                 </h3>
+
                 <p className="text-muted-foreground mt-2 flex-1 text-sm leading-6">
                   {description}
                 </p>
+
                 <div className="mt-5 flex flex-wrap gap-2">
                   {tags.map((tag) => (
                     <span
@@ -150,6 +190,7 @@ export function CalculatorCategories() {
                     </span>
                   ))}
                 </div>
+
                 {actions ? (
                   <div className="mt-5 flex flex-wrap gap-x-5 gap-y-3">
                     {actions.map((action) => (

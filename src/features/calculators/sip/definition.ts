@@ -149,9 +149,9 @@ export function calculateSIP(values: SIPInputs) {
 
 export const sipCalculatorDefinition: CalculatorDefinition<SIPInputs> = {
   id: "sip-calculator",
-  title: "SIP Calculator",
+  title: "WealthTogether SIP Planner",
   description:
-    "Estimate how a monthly SIP and annual step-up could grow over time. Adjust the assumptions to compare scenarios.",
+    "Explore how regular monthly investments may grow over time using your own assumptions. Compare different SIP scenarios for educational planning purposes. This planner provides illustrative estimates only and does not constitute investment advice.",
   schema: sipInputSchema,
   defaultValues: {
     monthlySip: 10_000,

@@ -98,19 +98,29 @@ export function CalculatorShell<TValues extends FieldValues>({
         ) : null}
       </div>
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(18rem,.78fr)_minmax(0,1.22fr)] xl:gap-7">
-        <Card className="lg:sticky lg:top-24">
-          <CardHeader>
-            <CardTitle>Explore your scenario</CardTitle>
-            <CardDescription>
-              Adjust the assumptions to see how the picture changes.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              className="space-y-5"
-              noValidate
-              onSubmit={calculator.calculate}
-            >
+  <Card className="lg:sticky lg:top-24 border-gold/20 shadow-lg">
+    <CardHeader>
+      <div className="inline-flex w-fit items-center rounded-full bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gold">
+        WealthTogether Educational Planner
+      </div>
+
+      <CardTitle className="mt-4 text-2xl">
+        Plan Your Investment
+      </CardTitle>
+
+      <CardDescription className="mt-2 leading-6">
+        Enter your assumptions below to generate an illustrative projection.
+        This planner is designed for financial education and learning purposes
+        only.
+      </CardDescription>
+    </CardHeader>
+
+    <CardContent>
+      <form
+        className="space-y-5"
+        noValidate
+        onSubmit={calculator.calculate}
+      >
               <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 {visibleFields.map((field) => (
                   <div
@@ -141,7 +151,7 @@ export function CalculatorShell<TValues extends FieldValues>({
                   type="submit"
                   variant="gold"
                 >
-                  Calculate scenario
+                  Generate Projection
                 </Button>
                 <CalculatorActions
                   hasResult={Boolean(calculator.result)}
