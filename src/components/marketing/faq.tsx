@@ -4,56 +4,80 @@ import { Eyebrow, SectionHeading } from "@/components/ui/typography";
 
 const questions = [
   {
-    question: "Who is WealthTogether designed for?",
+    question: "Is WealthTogether free to use?",
     answer:
-      "For individuals and partners who want a more thoughtful way to talk about money, compare priorities, and plan the next chapter.",
+      "Yes. Our financial calculators and educational resources are available free to help you understand your finances better. Some premium planners, workshops, and personalized consultation services are offered separately.",
   },
   {
-    question: "Do we need to have the same goals to plan together?",
+    question: "Are these calculators accurate?",
     answer:
-      "No. A shared plan can hold individual priorities alongside the goals you have in common. The point is to make those priorities easier to discuss.",
+      "Our calculators use standard financial formulas and assumptions to provide educational estimates. Actual investment returns depend on market performance, inflation, taxes, and your personal financial situation.",
   },
   {
-    question: "What kinds of planning topics can I explore?",
+    question: "Do I need investment knowledge before using these tools?",
     answer:
-      "The categories cover everyday saving, retirement, investing, a home purchase, family and education goals, and financial preparedness.",
+      "Not at all. WealthTogether is designed for beginners, young professionals, families, and anyone who wants to learn money management step by step using simple language and practical examples.",
   },
   {
-    question: "Are planning estimates personal financial advice?",
+    question: "Will WealthTogether recommend specific mutual funds?",
     answer:
-      "No. Planning scenarios and estimates are educational starting points, not individualized investment, tax, or legal advice. Consider speaking with a qualified professional about your situation.",
+      "No. Our calculators help you understand your financial goals and estimate investment requirements. Personalized mutual fund recommendations are provided only during a dedicated consultation after understanding your goals and risk profile.",
   },
   {
-    question: "Do I have to connect a financial account?",
+    question: "Can I book a personalized financial consultation?",
     answer:
-      "You can begin by thinking about your goals and priorities. Any account connections or data-sharing features should be clearly explained before you choose to use them.",
+      "Yes. If you'd like a customized financial roadmap, goal planning, portfolio review, or investment guidance, you can book a one-on-one consultation with WealthTogether Investments directly from our website.",
   },
 ];
 
 export function FAQ() {
   return (
     <section className="bg-secondary/60" id="faq">
-      <div className="px-content mx-auto grid max-w-7xl gap-10 py-20 sm:py-24 lg:grid-cols-[.75fr_1.25fr] lg:gap-20">
+      <div className="px-content mx-auto grid max-w-7xl gap-10 py-20 sm:py-24 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         <div>
-          <Eyebrow>GOOD TO KNOW</Eyebrow>
+          <Eyebrow>BEFORE YOU START</Eyebrow>
+
           <SectionHeading className="mt-3 text-3xl sm:text-4xl">
-            A few thoughtful answers.
+            Frequently Asked Questions
           </SectionHeading>
-          <p className="text-muted-foreground mt-4 text-sm leading-6">
-            Have another question? Start with what matters most to you.
+
+          <p className="text-muted-foreground mt-4 text-base leading-7">
+            Everything you need to know before using WealthTogether&apos;s financial
+            calculators, planners, and educational resources.
           </p>
+
+          <div className="mt-8 rounded-2xl border border-gold/20 bg-card p-6">
+            <h3 className="font-display text-xl">
+              Still have a question?
+            </h3>
+
+            <p className="text-muted-foreground mt-3 text-sm leading-6">
+              Our goal is to simplify financial planning for everyone. If you
+              need personalized guidance, our team is here to help.
+            </p>
+
+            <a
+              href="/consultation"
+              className="bg-gold text-navy mt-6 inline-flex rounded-lg px-5 py-3 text-sm font-semibold transition hover:opacity-90"
+            >
+              Book a 1:1 Consultation
+            </a>
+          </div>
         </div>
-        <div className="divide-border divide-y">
+
+        <div className="divide-border divide-y rounded-2xl border bg-card px-6">
           {questions.map(({ question, answer }) => (
-            <details className="group py-5 first:pt-0" key={question}>
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-left text-sm font-semibold marker:hidden [&::-webkit-details-marker]:hidden">
+            <details className="group py-6" key={question}>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-left text-base font-semibold marker:hidden [&::-webkit-details-marker]:hidden">
                 {question}
+
                 <ChevronDown
                   aria-hidden="true"
-                  className="text-muted-foreground size-4 shrink-0 transition-transform group-open:rotate-180"
+                  className="text-muted-foreground size-5 shrink-0 transition-transform duration-300 group-open:rotate-180"
                 />
               </summary>
-              <p className="text-muted-foreground max-w-2xl pt-3 pr-8 text-sm leading-6">
+
+              <p className="text-muted-foreground max-w-2xl pt-4 pr-8 text-sm leading-7">
                 {answer}
               </p>
             </details>
