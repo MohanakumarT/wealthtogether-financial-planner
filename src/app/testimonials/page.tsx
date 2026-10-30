@@ -128,7 +128,7 @@ export default function TestimonialsPage() {
       </h3>
 
       <p className="text-sm text-gold">
-        Children's Future Planning
+        Children&apos;s Future Planning
       </p>
     </div>
 
