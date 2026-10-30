@@ -1,9 +1,7 @@
-import { CalculatorCategories } from "@/components/marketing/calculator-categories";
 import { CallToAction } from "@/components/marketing/call-to-action";
 import { FAQ } from "@/components/marketing/faq";
 import { Features } from "@/components/marketing/features";
 import { Hero } from "@/components/marketing/hero";
-import { Ecosystem  } from "@/components/marketing/ecosystem";
 import { TrustStats } from "@/components/marketing/trust-stats";
 import { WhyWealthTogether } from "@/components/marketing/why-wealthtogether";
 import { Footer } from "@/components/footer";
@@ -29,11 +27,7 @@ export default function HomePage() {
 
         <Features />
 
-        <CalculatorCategories />
-
         <WhyWealthTogether />
-
-        <Ecosystem  />
 
         <FAQ />
 

@@ -6,7 +6,7 @@ import { AuthNavigationActions } from "@/components/auth/auth-navigation-actions
 
 const links = [
   { label: "Home", href: "/" },
-  { label: "Calculators", href: "/#calculators" },
+  { label: "Calculators", href: "/calculators" },
   { label: "Services", href: "/services" },
   { label: "Testimonials", href: "/testimonials" },
   { label: "About", href: "/#why" },

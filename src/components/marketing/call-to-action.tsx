@@ -59,7 +59,7 @@ export function CallToAction() {
               variant="outline"
               className="border-white/25 text-white hover:bg-white/10"
             >
-              <Link href="/#calculators">
+              <Link href="/calculators">
                 Explore Calculators
               </Link>
             </Button>

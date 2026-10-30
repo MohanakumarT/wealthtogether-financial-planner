@@ -1,10 +1,8 @@
+import Link from "next/link";
 import {
   BookOpen,
   Calculator,
   GraduationCap,
-  LineChart,
-  Sparkles,
-  Target,
 } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
@@ -13,109 +11,89 @@ import { Eyebrow, SectionHeading } from "@/components/ui/typography";
 const sections = [
   {
     icon: BookOpen,
-    title: "Financial Learning Hub",
+    title: "Financial Education",
     description:
-      "Simple articles and guides to help you understand money, investing, insurance and personal finance.",
-    status: "Explore →",
-  },
-  {
-    icon: Target,
-    title: "Financial Planners",
-    description:
-      "Goal-based planners for retirement, child education, home purchase, emergency fund and financial freedom.",
-    status: "Start Planning →",
+      "Learn mutual funds, SIPs, insurance and personal finance through simple educational resources.",
+    button: "Explore Learning →",
+    href: "/services",
   },
   {
     icon: Calculator,
-    title: "Interactive Calculators",
+    title: "Premium Calculators",
     description:
-      "Educational calculators that help you estimate, compare and understand different financial scenarios.",
-    status: "Open Calculators →",
-  },
-  {
-    icon: LineChart,
-    title: "Goal Tracker",
-    description:
-      "Track your progress, savings and milestones as you work toward your financial goals.",
-    status: "Coming Soon",
-  },
-  {
-    icon: Sparkles,
-    title: "AI Financial Assistant",
-    description:
-      "Ask questions and receive simple educational explanations whenever you need financial clarity.",
-    status: "Coming Soon",
+      "Use interactive calculators to plan retirement, children's education, SIPs, emergency funds and financial goals.",
+    button: "Explore Calculators →",
+    href: "/calculators",
   },
   {
     icon: GraduationCap,
-    title: "WealthTogether Academy",
+    title: "Educational Consultation",
     description:
-      "Premium workshops, courses and financial education programs designed to build long-term confidence.",
-    status: "Coming Soon",
+      "Book a one-to-one educational consultation to better understand financial concepts before making investment decisions.",
+    button: "Book Consultation →",
+    href: "/consultation",
   },
 ];
 
 export function Ecosystem() {
   return (
     <section
-      className="px-content mx-auto max-w-7xl py-20 sm:py-24"
       id="ecosystem"
+      className="px-content mx-auto max-w-7xl py-20 sm:py-24"
     >
       <div className="mx-auto max-w-3xl text-center">
         <Eyebrow>EXPLORE WEALTHTOGETHER</Eyebrow>
 
         <SectionHeading className="mt-3 text-3xl sm:text-4xl">
-          Everything you need to build your financial future.
+          Everything You Need to Build Financial Confidence
         </SectionHeading>
 
         <p className="text-muted-foreground mt-5 text-base leading-7">
-          WealthTogether brings together financial education, planners,
-          calculators and learning experiences to help you make informed
-          financial decisions with confidence.
+          Simple financial education, interactive calculators and one-to-one
+          guidance to help you make informed financial decisions with
+          confidence.
         </p>
       </div>
 
-      <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {sections.map(({ icon: Icon, title, description, status }) => (
-          <Card
-            key={title}
-            className="group flex h-full flex-col rounded-2xl border p-7 transition-all duration-300 hover:-translate-y-2 hover:border-yellow-500/40 hover:shadow-xl"
-          >
-            <div className="bg-gold/10 text-gold flex h-14 w-14 items-center justify-center rounded-2xl">
-              <Icon className="h-7 w-7" />
-            </div>
+      <div className="mt-14 grid gap-6 md:grid-cols-3">
+        {sections.map(({ icon: Icon, title, description, button, href }) => (
+          <Link key={title} href={href} className="block">
+            <Card className="group flex h-full flex-col rounded-3xl border border-white/10 bg-white/0.3 p-8 transition-all duration-300 hover:-translate-y-2 hover:border-[#D4AF37]/40 hover:bg-white/0.5">
+              <div className="bg-gold/10 text-gold flex h-14 w-14 items-center justify-center rounded-2xl">
+                <Icon className="h-7 w-7" />
+              </div>
 
-            <h3 className="font-display mt-6 text-2xl">
-              {title}
-            </h3>
+              <h3 className="font-display mt-6 text-2xl">
+                {title}
+              </h3>
 
-            <p className="text-muted-foreground mt-4 flex-1 leading-7">
-              {description}
-            </p>
+              <p className="text-muted-foreground mt-4 flex-1 leading-7">
+                {description}
+              </p>
 
-            <div className="mt-8 border-t pt-5">
-              <span className="text-primary font-semibold transition-colors group-hover:text-yellow-600">
-                {status}
-              </span>
-            </div>
-          </Card>
+              <div className="mt-8 border-t border-white/10 pt-5">
+                <span className="text-gold font-semibold transition-colors group-hover:opacity-80">
+                  {button}
+                </span>
+              </div>
+            </Card>
+          </Link>
         ))}
       </div>
 
-      <div className="mt-14 rounded-3xl bg-[#081B3A] px-8 py-10 text-center text-white">
-        <p className="text-gold text-sm font-semibold tracking-widest">
-          OUR MISSION
+      <div className="bg-navy mt-16 rounded-3xl px-8 py-12 text-center text-white">
+        <p className="text-gold text-sm font-semibold tracking-[0.25em] uppercase">
+          Our Mission
         </p>
 
-        <h3 className="mt-3 text-3xl font-bold">
-          Learn. Plan. Grow.
+        <h3 className="mt-4 text-3xl font-bold">
+          Invest Money. Invest Time. Build Life.
         </h3>
 
-        <p className="mx-auto mt-5 max-w-3xl text-white/75 leading-7">
-          We believe financial planning should be simple, practical and
-          accessible. Our goal is to help every individual and family make
-          better financial decisions through education and interactive planning
-          tools.
+        <p className="mx-auto mt-6 max-w-3xl leading-7 text-white/75">
+          WealthTogether exists to simplify financial education and empower
+          individuals and families to make confident financial decisions
+          through practical learning, planning tools and educational guidance.
         </p>
       </div>
     </section>
