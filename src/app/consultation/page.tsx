@@ -167,7 +167,7 @@ export default function ConsultationPage() {
     <a
       href={contact.whatsappHref}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
     >
       Open WhatsApp
       <ArrowUpRight className="ml-2 size-4" />
