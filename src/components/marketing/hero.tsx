@@ -57,7 +57,7 @@ export function Hero() {
 
           <div className="mt-9 flex flex-wrap gap-3">
             <Button asChild size="lg" variant="gold">
-              <a href="#calculators">
+              <a href="/calculators">
                 Explore Financial Tools
                 <ArrowRight aria-hidden="true" className="size-4" />
               </a>

@@ -252,10 +252,10 @@ export default function ServicesPage() {
                   size="lg"
                   variant="outline"
                 >
-                  <Link href="/consultation">
-                    Explore Services
-                    <ArrowDown aria-hidden="true" className="size-4" />
-                  </Link>
+                  <Link href="/services#our-services">
+  Explore Services
+  <ArrowDown aria-hidden="true" className="size-4" />
+</Link>
                 </Button>
               </div>
               <div className="mt-10 flex items-center gap-3 text-sm text-white/60">
@@ -346,7 +346,7 @@ export default function ServicesPage() {
 
         <section
           className="px-content mx-auto max-w-7xl py-16 sm:py-20 lg:py-24"
-          id="services"
+          id="our-services"
         >
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-primary text-xs font-semibold tracking-[0.16em] uppercase">
