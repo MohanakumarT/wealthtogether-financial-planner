@@ -70,8 +70,8 @@ export default function AboutPage() {
               </p>
 
               <p className="text-muted-foreground mt-4 leading-8">
-                Whether you're starting your first SIP,
-                planning your child's education,
+                Whether you&apos;are starting your first SIP,
+                planning your child&apos;s education,
                 preparing for retirement,
                 or building long-term wealth,
                 WealthTogether is here to guide you with
