@@ -7,6 +7,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";  
 import { Footer } from "@/components/footer";
 import { Navigation } from "@/components/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -133,15 +134,16 @@ export default function ConsultationPage() {
                 Talk with us directly
               </h2>
 
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div className="mt-3 grid grid-cols-2 gap-4">
                 {/* WhatsApp */}
                 <Card>
-                  <CardContent className="flex items-center gap-4 p-5">
-                    <span className="grid size-12 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600">
-                      <MessageCircle className="size-6" />
-                    </span>
+                  <CardContent className="flex flex-col p-5">
+  <div className="flex items-start gap-4">
+    <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600">
+      <MessageCircle className="size-6" />
+    </span>
 
-                       <div className="flex-1">
+    <div className="flex-1">
       <p className="text-foreground text-base font-semibold">
         WhatsApp
       </p>
@@ -154,28 +156,33 @@ export default function ConsultationPage() {
         Quick replies • Consultation booking
       </p>
     </div>
+  </div>
 
-    {contact.whatsapp && (
-      <a
-        href={contact.whatsappHref}
-        target="_blank"
-        rel="noreferrer"
-        aria-label="Open WhatsApp"
-      >
-        <ArrowUpRight className="text-primary size-5" />
-      </a>
-    )}
+  <Button
+    asChild
+    variant="outline"
+    size="sm"
+    className="mt-5 w-full"
+  >
+    <a
+      href={contact.whatsappHref}
+      target="_blank"
+      rel="noreferrer"
+    >
+      Open WhatsApp
+      <ArrowUpRight className="ml-2 size-4" />
+    </a>
+  </Button>
                   </CardContent>
                 </Card>
-
-                {/* Email */}
                 <Card>
-                  <CardContent className="flex items-center gap-4 p-5">
-                    <span className="grid size-12 place-items-center rounded-xl bg-yellow-500/10 text-yellow-600">
-                      <Mail className="size-6" />
-                    </span>
+                  <CardContent className="flex flex-col p-5">
+  <div className="flex items-start gap-4">
+    <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-yellow-500/10 text-yellow-600">
+      <Mail className="size-6" />
+    </span>
 
-                     <div className="flex-1">
+    <div className="flex-1">
       <p className="text-foreground text-base font-semibold">
         Email
       </p>
@@ -188,16 +195,20 @@ export default function ConsultationPage() {
         We usually reply within 24 hours.
       </p>
     </div>
+  </div>
 
-    {contact.email && (
-      <a
-        href={`mailto:${contact.email}`}
-        aria-label="Send Email"
-      >
-        <ArrowUpRight className="text-primary size-5" />
-      </a>
-    )}
-                  </CardContent>
+  <Button
+    asChild
+    variant="outline"
+    size="sm"
+    className="mt-5 w-full"
+  >
+    <a href={`mailto:${contact.email}`}>
+      Send Email
+      <ArrowUpRight className="ml-2 size-4" />
+    </a>
+  </Button>
+</CardContent>
                 </Card>
               </div>
             </div>
