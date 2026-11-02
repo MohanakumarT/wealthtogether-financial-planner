@@ -79,7 +79,7 @@ function getContactChannels() {
     {
       label: "LinkedIn",
       detail: "Connect with WealthTogether",
-      action: linkedinUrl ? "Open LinkedIn" : "Use the contact form",
+      action: linkedinUrl ? "Open LinkedIn" : "Open LinkedIn",
       href: linkedinUrl || "#contact-form",
       icon: Linkedin,
       color: "bg-blue-500/10 text-blue-700 dark:text-blue-300",

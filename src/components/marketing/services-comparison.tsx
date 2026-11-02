@@ -9,44 +9,74 @@ const services = [
     name: "WealthTogether Investment Blueprint™",
     badge: "Most Popular",
     price: "₹1,499",
-    action: "Book Now",
+    action: "Book Consultation",
     features: [
-      "Two private sessions · 120 minutes",
+      "Two 1:1 Strategy Sessions (120 mins)",
       "Google Meet",
-      "Mutual fund basics + goal planning",
-      "—",
-      "—",
+      "Beginners who need a personalized investment plan",
+      "Personalized Financial Blueprint",
+      "✓ Included",
+      "✓ Yes",
+      "✓ Personalized",
+      "Optional",
+      "✓ Included",
+      "WhatsApp Support",
+      "ARN-362166",
     ],
   },
   {
-    name: "WealthTogether Financial Freedom Cohort™",
+    name: "WealthTogether Financial Freedom Blueprint™",
     badge: "",
     price: "₹4,999",
     action: "Join Next Batch",
     features: [
-      "Four-week learning cohort",
-      "Live online",
-      "Money, protection & investment curriculum",
-      "Tamil + English",
-      "—",
+      "4-Week Live Cohort",
+      "Live Online",
+      "Complete Financial Education",
+      "20 Live Sessions + Workbook + Community",
+      "✓ Included",
+      "✓ Yes",
+      "Learn How to Choose",
+      "Optional",
+      "✓ Included",
+      "Community + WhatsApp",
+      "ARN-362166",
     ],
   },
   {
     name: "Invest Through WealthTogether",
     badge: "",
-    price: "Free Account Opening",
+    price: "₹0",
     action: "Start Investing",
     features: [
-      "Account opening",
-      "Through WealthTogether",
-      "Goal planning · SIP tracking · portfolio support",
-      "—",
+      "Mutual Fund Investment",
+      "Online / Assisted",
+      "Ready to Start Investing",
+      "Investment Account Setup",
+      "✓ Included",
+      "✓ Yes",
+      "✓ Personalized",
+      "✓ Included",
+      "✓ Included",
+      "Ongoing WhatsApp Support",
       "ARN-362166",
     ],
   },
 ];
 
-const featureLabels = ["Format", "Delivery", "Focus", "Language", "ARN"];
+const featureLabels = [
+  "Format",
+  "Delivery",
+  "Best For",
+  "Includes",
+  "Portfolio Review",
+  "Goal Planning",
+  "Mutual Fund Recommendation",
+  "Investment Execution",
+  "Annual Review",
+  "Support",
+  "ARN",
+];
 
 export function ServicesComparison() {
   return (
@@ -54,14 +84,13 @@ export function ServicesComparison() {
       <div className="px-content mx-auto max-w-7xl py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-primary text-xs font-semibold tracking-[0.16em] uppercase">
-            COMPARE YOUR OPTIONS
+            CHOOSE YOUR PATH
           </p>
           <h2 className="font-display mt-3 text-3xl tracking-tight sm:text-4xl">
-            A clear view of each service
+            Choose the Right Way to Start Your Investment Journey
           </h2>
           <p className="text-muted-foreground mt-4 text-sm leading-6 sm:text-base">
-            Compare the format, focus, and starting price to find the right next
-            step for you.
+            Whether you need personalized planning, structured financial education, or you&apos;re ready to start investing, WealthTogether has the right solution.
           </p>
         </div>
 
@@ -211,8 +240,7 @@ export function ServicesComparison() {
         </div>
 
         <p className="text-muted-foreground mt-5 text-center text-xs leading-5">
-          Investing involves risk. Account opening is subject to applicable
-          eligibility and onboarding requirements.
+          Mutual fund investments are subject to market risks. Please read all scheme-related documents carefully before investing.
         </p>
       </div>
     </section>

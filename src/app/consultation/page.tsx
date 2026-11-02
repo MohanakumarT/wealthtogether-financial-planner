@@ -139,19 +139,25 @@ export default function ConsultationPage() {
                         WhatsApp
                       </p>
                       {contact.whatsapp ? (
-                        <a
-                          className="text-muted-foreground hover:text-foreground mt-0.5 block truncate text-xs"
-                          href={contact.whatsappHref}
-                          rel="noreferrer"
-                          target="_blank"
-                        >
-                          {contact.whatsapp}
-                        </a>
-                      ) : (
-                        <p className="text-muted-foreground mt-0.5 text-xs">
-                          Contact details coming soon
-                        </p>
-                      )}
+  <>
+    <a
+      className="text-foreground hover:text-primary mt-0.5 block text-sm font-semibold"
+      href={contact.whatsappHref}
+      rel="noreferrer"
+      target="_blank"
+    >
+      {contact.whatsapp}
+    </a>
+
+    <p className="text-muted-foreground mt-1 text-xs">
+      Quick replies • Consultation booking
+    </p>
+  </>
+) : (
+  <p className="text-muted-foreground mt-1 text-xs">
+    Chat with us for quick assistance.
+  </p>
+)}
                     </div>
                     {contact.whatsapp ? (
                       <a
