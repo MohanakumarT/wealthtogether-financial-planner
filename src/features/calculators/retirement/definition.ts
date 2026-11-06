@@ -291,14 +291,14 @@ export const retirementCalculatorDefinition: CalculatorDefinition<RetirementInpu
       "Estimate the retirement corpus your spending may require, and see how current savings and a monthly SIP could support your plan.",
     schema: retirementInputSchema,
     defaultValues: {
-      currentAge: 35,
-      retirementAge: 60,
-      monthlyExpenses: 75_000,
-      inflation: 6,
-      expectedReturn: 10,
-      retirementYears: 25,
-      currentSavings: 500_000,
-      monthlyContribution: 15_000,
+      currentAge: 0,
+      retirementAge: 0,
+      monthlyExpenses: 0,
+      inflation: 0,
+      expectedReturn: 0,
+      retirementYears: 0,
+      currentSavings: 0,
+      monthlyContribution: 0,
     },
     fields: [
       {

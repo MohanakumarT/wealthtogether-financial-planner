@@ -154,10 +154,10 @@ export const sipCalculatorDefinition: CalculatorDefinition<SIPInputs> = {
     "Explore how regular monthly investments may grow over time using your own assumptions. Compare different SIP scenarios for educational planning purposes. This planner provides illustrative estimates only and does not constitute investment advice.",
   schema: sipInputSchema,
   defaultValues: {
-    monthlySip: 10_000,
-    years: 10,
-    expectedReturn: 12,
-    stepUpPercent: 10,
+    monthlySip: 0,
+    years: 0,
+    expectedReturn: 0,
+    stepUpPercent: 0,
   },
   fields: [
     {

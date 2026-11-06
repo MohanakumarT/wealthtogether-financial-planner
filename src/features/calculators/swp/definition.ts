@@ -161,10 +161,10 @@ export const swpCalculatorDefinition: CalculatorDefinition<SWPInputs> = {
     "Estimate a monthly withdrawal plan, see how your remaining corpus may change, and understand its projected longevity.",
   schema: swpInputSchema,
   defaultValues: {
-    initialCorpus: 10_000_000,
-    monthlyWithdrawal: 60_000,
-    expectedReturn: 8,
-    projectionYears: 25,
+    initialCorpus: 0,
+    monthlyWithdrawal: 0,
+    expectedReturn: 0,
+    projectionYears: 0,
   },
   fields: [
     {

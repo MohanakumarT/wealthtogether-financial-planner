@@ -268,14 +268,14 @@ export const carPurchaseCalculatorDefinition: CalculatorDefinition<CarPurchaseIn
       "Compare saving for a car outright with saving for a down payment and financing the balance.",
     schema: carPurchaseInputSchema,
     defaultValues: {
-      carCost: 1_500_000,
-      yearsUntilPurchase: 3,
-      carInflation: 5,
-      downPaymentPercent: 20,
-      expectedReturn: 8,
-      currentSavings: 100_000,
-      loanInterest: 9,
-      loanTermYears: 5,
+      carCost: 0,
+      yearsUntilPurchase: 0,
+      carInflation: 0,
+      downPaymentPercent: 0,
+      expectedReturn: 0,
+      currentSavings: 0,
+      loanInterest: 0,
+      loanTermYears: 0,
     },
     fields: [
       {

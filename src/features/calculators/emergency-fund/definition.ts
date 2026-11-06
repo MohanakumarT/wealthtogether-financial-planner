@@ -164,10 +164,10 @@ export const emergencyFundCalculatorDefinition: CalculatorDefinition<EmergencyFu
       "Set a practical cash reserve target based on your monthly expenses and see how long it may take to build.",
     schema: emergencyFundInputSchema,
     defaultValues: {
-      monthlyExpenses: 60_000,
-      coverageMonths: "6",
-      currentSavings: 100_000,
-      monthlySavings: 15_000,
+      monthlyExpenses: 0,
+      coverageMonths: "3",
+      currentSavings: 0,
+      monthlySavings: 0,
     },
     fields: [
       {

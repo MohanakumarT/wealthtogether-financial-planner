@@ -165,11 +165,11 @@ export const educationCalculatorDefinition: CalculatorDefinition<EducationInputs
       "Plan toward a future education goal by estimating its inflation-adjusted cost, the corpus to target, and a monthly SIP to get there.",
     schema: educationInputSchema,
     defaultValues: {
-      yearsUntilEducation: 12,
-      currentEducationCost: 2_500_000,
-      inflation: 8,
-      expectedReturn: 10,
-      currentSavings: 250_000,
+      yearsUntilEducation: 0,
+      currentEducationCost: 0,
+      inflation: 0,
+      expectedReturn: 0,
+      currentSavings: 0,
     },
     fields: [
       {

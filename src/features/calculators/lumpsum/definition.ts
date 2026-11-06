@@ -131,9 +131,9 @@ export const lumpsumCalculatorDefinition: CalculatorDefinition<LumpsumInputs> =
       "Estimate how a one-time investment could grow with annual compounding. Adjust the assumptions to explore the outcome over time.",
     schema: lumpsumInputSchema,
     defaultValues: {
-      investment: 100_000,
-      years: 10,
-      annualReturn: 12,
+      investment: 0,
+      years: 0,
+      annualReturn: 0,
     },
     fields: [
       {

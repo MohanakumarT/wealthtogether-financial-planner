@@ -176,12 +176,12 @@ export const housePurchaseCalculatorDefinition: CalculatorDefinition<HousePurcha
       "Estimate what a home may cost in the future and plan a monthly SIP toward its down payment.",
     schema: housePurchaseInputSchema,
     defaultValues: {
-      houseCost: 8_000_000,
-      downPaymentPercent: 20,
-      inflation: 6,
-      years: 8,
-      expectedReturn: 10,
-      currentSavings: 500_000,
+      houseCost: 0,
+      downPaymentPercent: 0,
+      inflation: 0,
+      years: 0,
+      expectedReturn: 0,
+      currentSavings: 0,
     },
     fields: [
       {

@@ -227,11 +227,11 @@ export const stepUpSIPCalculatorDefinition: CalculatorDefinition<StepUpSIPInputs
       "Compare a steady SIP with annual 5%, 10%, or custom step-ups and see how a growing contribution could change your projected corpus.",
     schema: stepUpSIPInputSchema,
     defaultValues: {
-      monthlySip: 10_000,
-      years: 10,
-      expectedReturn: 12,
-      stepUpType: "5",
-      customStepUp: 15,
+      monthlySip: 0,
+      years: 0,
+      expectedReturn: 0,
+      stepUpType: "custom",
+      customStepUp: 0,
     },
     fields: [
       {

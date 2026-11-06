@@ -169,11 +169,11 @@ export const marriageGoalCalculatorDefinition: CalculatorDefinition<MarriageGoal
       "Estimate the future cost of a marriage goal and the monthly SIP that could help you prepare for it.",
     schema: marriageGoalInputSchema,
     defaultValues: {
-      currentCost: 2_000_000,
-      yearsUntilGoal: 10,
-      inflation: 6,
-      expectedReturn: 10,
-      currentSavings: 100_000,
+      currentCost: 0,
+      yearsUntilGoal: 0,
+      inflation: 0,
+      expectedReturn: 0,
+      currentSavings: 0,
     },
     fields: [
       {

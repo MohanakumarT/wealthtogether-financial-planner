@@ -322,13 +322,13 @@ export const mutualFundGoalPlannerCalculatorDefinition: CalculatorDefinition<Mut
     schema: mutualFundGoalPlannerInputSchema,
     defaultValues: {
       goalType: "child-education",
-      goalAmountToday: 2_500_000,
-      yearsToGoal: 12,
-      inflation: 6,
-      currentSavings: 250_000,
-      monthlySip: 10_000,
-      comparisonSip: 15_000,
-      expectedAnnualReturn: 10,
+      goalAmountToday: 0,
+      yearsToGoal: 0,
+      inflation: 0,
+      currentSavings: 0,
+      monthlySip: 0,
+      comparisonSip: 0,
+      expectedAnnualReturn: 0,
     },
     fields: [
       {

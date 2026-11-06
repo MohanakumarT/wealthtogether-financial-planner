@@ -129,9 +129,9 @@ export const inflationCalculatorDefinition: CalculatorDefinition<InflationInputs
       "Understand how inflation can change the future cost of a goal and the real buying power of money you hold today.",
     schema: inflationInputSchema,
     defaultValues: {
-      presentAmount: 1_000_000,
-      annualInflation: 6,
-      years: 10,
+      presentAmount: 0,
+      annualInflation: 0,
+      years: 0,
     },
     fields: [
       {
